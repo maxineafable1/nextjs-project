@@ -7,6 +7,8 @@ import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"
 import bcrypt from 'bcryptjs'
 import { redirect } from "next/navigation"
+import { SignupFormData } from "@/components/user/signup-form"
+// import { FormData1 } from "@/components/user/signup-form"
 
 export async function getSession() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions)
@@ -50,35 +52,24 @@ export async function login(state: LoginFormState, formData: FormData) {
   redirect('/')
 }
 
-export async function signup(state: SignupFormState, formData: FormData) {
+// state: SignupFormState
+export async function signup(formData: SignupFormData) {
   const session = await getSession()
 
-  const validatedFields = SignupFormSchema.safeParse({
-    email: formData.get('email'),
-    password: formData.get('password'),
-  })
+  const validatedFields = await SignupFormSchema.safeParseAsync(formData)
 
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-    }
-  }
+  if (!validatedFields.success) return
+  // return {
+  //   errors: validatedFields.error.flatten().fieldErrors,
+  // }
 
-  const { email, password } = validatedFields.data
-
-  const userExists = await prisma.user.findUnique({
-    where: {
-      email
-    }
-  })
-
-  if (userExists)
-    return { error: 'User already exists' }
+  const { name, email, password } = validatedFields.data
 
   const hashedPassword = await bcrypt.hash(password, 10)
 
   const newUser = await prisma.user.create({
     data: {
+      name,
       email,
       password: hashedPassword,
     }
@@ -93,5 +84,14 @@ export async function signup(state: SignupFormState, formData: FormData) {
 export async function logout() {
   const session = await getSession()
   session.destroy()
-  redirect('/login')
+  redirect('/')
+}
+
+export async function findEmail(email: string) {
+  const user = await prisma.user.findUnique({
+    where: {
+      email
+    }
+  })
+  return user?.email !== email
 }
