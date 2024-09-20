@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from "@/lib/db"
-import { LoginFormSchema, LoginFormState, SignupFormSchema, SignupFormState } from "@/lib/definitions"
+import { LoginFormSchema, LoginFormState, SignupFormSchema } from "@/lib/definitions"
 import { SessionData, sessionOptions } from "@/lib/session"
 import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"

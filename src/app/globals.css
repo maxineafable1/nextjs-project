@@ -1,3 +1,44 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+  .song-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 0.25rem;
+    outline: none;
+    @apply bg-neutral-400 rounded-full
+  }
+
+  /* .song-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 1rem;
+    height: 1rem;
+    background-color: green;
+    cursor: pointer;
+  } */
+
+  .song-slider::-moz-range-thumb {
+    width: 0;
+    height: 0;
+    border: none;
+  }
+
+  .song-slider:hover::-moz-range-thumb {
+    @apply h-2 w-2 bg-white cursor-pointer
+  }
+
+  .song-slider::-moz-range-progress {
+    @apply bg-white 
+  }
+
+  .song-slider:hover::-moz-range-progress {
+    @apply bg-green-500 
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+}

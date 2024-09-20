@@ -38,20 +38,27 @@ export default async function Navbar() {
             <li>
               <LogoutForm />
             </li>
+            <li>
+              <Link 
+                href='/songs/upload'
+                className="text-neutral-400 hover:text-neutral-200 font-bold"
+              >
+                Upload</Link>
+            </li>
           </>
         ) : (
           <>
             <li className="">
               <Link
                 href='/signup'
-                className="text-neutral-400 font-bold"
+                className="text-neutral-400 hover:text-neutral-200 font-bold"
               >
                 Sign up</Link>
             </li>
             <li>
               <Link
                 href='/login'
-                className="bg-white text-neutral-900 font-bold py-4 px-8 rounded-full"
+                className="bg-white hover:bg-neutral-200 text-neutral-900 font-bold py-4 px-8 rounded-full"
               >
                 Log in</Link>
             </li>

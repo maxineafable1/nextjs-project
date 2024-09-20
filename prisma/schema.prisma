@@ -13,9 +13,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
+model Song {
   id       String @id @default(auto()) @map("_id") @db.ObjectId
-  email    String @unique
+  title    String
+  lyrics   String
+  image    String
+  song     String
+  artist   User   @relation(fields: [artistId], references: [id])
+  artistId String @db.ObjectId
+}
+
+model User {
+  id       String  @id @default(auto()) @map("_id") @db.ObjectId
+  email    String  @unique
   name     String?
   password String
+  Song     Song[]
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from './actions/auth'
 
 // 1. Specify protected and public routes
-export const protectedRoutes = ['/dashboard']
+export const protectedRoutes = ['/songs']
 export const publicRoutes = ['/login', '/signup']
 
 export default async function middleware(req: NextRequest, res: NextResponse) {
@@ -19,7 +19,7 @@ export default async function middleware(req: NextRequest, res: NextResponse) {
 
   // redirect to dashboard if use is authenticated
   if (isPublicRoute && session.active)
-    return NextResponse.redirect(new URL('/dashboard', req.nextUrl))
+    return NextResponse.redirect(new URL('/', req.nextUrl))
 
   return NextResponse.next()
 }

@@ -3,6 +3,8 @@ import localFont from "next/font/local";
 import '../globals.css'
 import Navbar from "@/components/navbar";
 import Container from "@/components/container";
+import Player from "@/components/song/player";
+import { SongProvider } from "@/contexts/song-context";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -33,12 +35,20 @@ export default function RootLayout({
           bg-neutral-950 text-white
         `}
       >
-        <Container>
-          <Navbar />
-          <main>
-            {children}
-          </main>
-        </Container>
+        <SongProvider>
+          <Container>
+            <Navbar />
+            <main className="grid grid-cols-4 gap-2 min-h-dvh mb-4">
+              <div className="bg-neutral-900 rounded-lg p-4">
+                <h2 className="text-neutral-300 font-semibold">Your library</h2>
+              </div>
+              <div className="col-span-3 bg-neutral-900 rounded-lg p-4">
+                {children}
+              </div>
+            </main>
+          </Container>
+          <Player />
+        </SongProvider>
       </body>
     </html>
   );
