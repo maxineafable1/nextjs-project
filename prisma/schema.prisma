@@ -19,6 +19,7 @@ model Song {
   lyrics   String
   image    String
   song     String
+  genre    String
   artist   User   @relation(fields: [artistId], references: [id])
   artistId String @db.ObjectId
 }

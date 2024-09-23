@@ -4,79 +4,130 @@ import { useSongContext } from "@/contexts/song-context";
 import { useEffect, useRef, useState } from "react";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { CiVolumeHigh, CiVolumeMute } from "react-icons/ci";
+import { IoPlaySkipForward, IoPlaySkipBackSharp } from "react-icons/io5";
 
 export default function Player() {
-  const { currentSong } = useSongContext()
+  const { currentSong, setCurrentSong, currentAlbum } = useSongContext()
   const [playing, setPlaying] = useState(false)
-  const audioRef = useRef<HTMLAudioElement>(null)
+
   const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+
   const [isMuted, setIsMuted] = useState(false)
   const [volume, setVolume] = useState(0.5)
 
+  const audioRef = useRef<HTMLAudioElement>(null)
+
   function numToTime(value: number) {
     const minutes = Math.floor(value / 60)
-    const seconds = value - minutes * 60
+    const seconds = Math.trunc(value - minutes * 60)
     return `${String(minutes).padStart(1, '0')}:${String(seconds).padStart(2, '0')}`
   }
 
-  // console.log(currentSong)
   useEffect(() => {
     if (playing) {
       audioRef.current?.play()
     } else {
       audioRef.current?.pause()
     }
-  }, [playing])
+  }, [playing, currentSong?.song])
+
+  useEffect(() => {
+    if (!audioRef.current) return
+    const audio = audioRef.current
+
+    function getCurrSongDuration() {
+      console.log(audio.duration)
+      setDuration(audio.duration)
+    }
+
+    audio.addEventListener('loadedmetadata', getCurrSongDuration)
+    return () => {
+      audio.removeEventListener('loadedmetadata', getCurrSongDuration)
+    }
+  }, [currentSong?.song])
 
   useEffect(() => {
     if (!audioRef.current) return
     const song = audioRef.current
     // TODO volume toggle mute
-    setVolume(prev => isMuted ? 0 : prev)
+    if (isMuted) {
+      song.muted = true
+    } else {
+      song.muted = false
+    }
 
     song.volume = volume
-  }, [isMuted, volume])
+  }, [isMuted, volume, currentSong?.song])
 
   return (
-    <div className="bg-black fixed w-full p-4 bottom-0 h-20 flex items-center">
+    <div className="bg-black fixed w-full p-4 bottom-0 h-20 flex items-center gap-8">
       {currentSong && (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3 w-1/4 lg:w-fit">
           <img
             src={currentSong?.image}
             alt=""
             className="block aspect-square object-cover max-w-14 rounded-md"
           />
-          <div className="text-sm">
-            <p>{currentSong.title}</p>
-            <p>Artist Name</p>
+          <div>
+            <p className="font-semibold">{currentSong.title}</p>
+            <p className="text-sm text-neutral-300">{currentSong.artist.name}</p>
           </div>
         </div>
       )}
       {currentSong && (
         <audio
+          key={currentSong.song}
           ref={audioRef}
           onTimeUpdate={e => {
             // make the bar move
             const newTime = Math.trunc(e.currentTarget.currentTime)
             setCurrentTime(newTime)
           }}
+          preload="metadata"
         >
           <source src={currentSong.song} type="audio/mpeg" />
         </audio>
       )}
-      <div className="flex flex-col gap-2 items-center justify-center mx-auto">
-        <button
-          disabled={!currentSong}
-          onClick={() => {
-            console.log('click')
-            setPlaying(prev => !prev)
-          }}
-          className="bg-white rounded-full p-2 text-center hover:scale-105 hover:bg-neutral-200"
-        >
-          {playing ? <FaPause fill="black" /> : <FaPlay fill="black" />}
-        </button>
-        <div className="flex items-center gap-2">
-          <p className="text-xs">{numToTime(currentTime)}</p>
+      <div className="flex flex-col gap-2 items-center justify-center mx-auto w-1/2 lg:w-2/3 max-w-2xl">
+        <div className="flex items-center gap-4">
+          <button
+            title="Previous"
+            onClick={() => {
+              const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
+              if (currentIndex > 0)
+                setCurrentSong(currentAlbum[currentIndex - 1])
+            }}
+            className="text-neutral-300 hover:text-neutral-200 hover:scale-105"
+          >
+            <IoPlaySkipBackSharp fontSize='1.5rem' />
+          </button>
+          <button
+            disabled={!currentSong}
+            title={playing ? 'Pause': 'Play'}
+            onClick={() => {
+              setPlaying(prev => !prev)
+            }}
+            className="bg-white rounded-full p-2 text-center hover:scale-105 hover:bg-neutral-200"
+          >
+            {playing ? <FaPause fill="black" /> : <FaPlay fill="black" />}
+          </button>
+          <button
+            title="Next"
+            onClick={() => {
+              const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
+              if (currentIndex < currentAlbum.length - 1)
+                setCurrentSong(currentAlbum[currentIndex + 1])
+            }}
+            className="text-neutral-300 hover:text-neutral-200 hover:scale-105"
+          >
+            <IoPlaySkipForward fontSize='1.5rem' />
+          </button>
+        </div>
+        <div className="flex items-center gap-2 w-full">
+          <p className="text-xs">
+            {numToTime(currentTime)}
+          </p>
           <input
             type="range"
             min={0}
@@ -90,9 +141,11 @@ export default function Player() {
               song.currentTime = e.target.valueAsNumber
               setCurrentTime(e.target.valueAsNumber)
             }}
-            className="song-slider"
+            className="song-slider w-full"
           />
-          <p className="text-xs">{audioRef.current ? numToTime(audioRef.current?.duration) : '0:00'}</p>
+          <p className="text-xs">
+            {numToTime(duration)}
+          </p>
         </div>
       </div>
       <div className="flex items-center gap-2">
@@ -100,6 +153,7 @@ export default function Player() {
           onClick={() => {
             setIsMuted(prev => !prev)
           }}
+          className="text-xl text-neutral-300 hover:text-neutral-200 hover:scale-105"
         >
           {isMuted ? <CiVolumeMute /> : <CiVolumeHigh />}
         </button>
@@ -111,14 +165,18 @@ export default function Player() {
           value={volume}
           disabled={!currentSong}
           onChange={e => {
+            const newVol = e.target.valueAsNumber
             setIsMuted(false)
-            setVolume(e.target.valueAsNumber)
+            setVolume(() => {
+              if (newVol === 0) {
+                setIsMuted(true)
+              }
+              return newVol
+            })
           }}
-          className="song-slider w-32"
+          className={`song-slider w-32 ${isMuted && 'muted'}`}
         />
       </div>
-
-    </div >
-
+    </div>
   )
 }

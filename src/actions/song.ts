@@ -1,60 +1,49 @@
 'use server'
 
-import { SongFormData } from "@/components/song/upload-form";
 import { getSession } from "./auth";
-import { SongFormSchema } from "@/lib/definitions";
 import prisma from "@/lib/db";
 import { redirect } from "next/navigation";
-import fs from "node:fs/promises";
-import { join } from "node:path";
+import { revalidatePath } from "next/cache";
 
-export async function upload(formData: FormData) {
+export type NewDataType = {
+  title: string
+  genre: string
+  lyrics: string
+  image: string
+  song: string
+}
+
+export async function upload(newData: NewDataType) {
   const session = await getSession()
 
-  const validatedFields = SongFormSchema.safeParse({
-    title: formData.get('title'),
-    lyrics: formData.get('lyrics'),
-    image: formData.get('image'),
-    song: formData.get('song'),
-  })
-
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors
-    }
-  }
-
-  const { title, lyrics, image, song } = validatedFields.data
-
-  const imgArrayBuffer = await image.arrayBuffer()
-  const imgBuffer = Buffer.from(imgArrayBuffer)
-
-  const imgFileName = `${Date.now()}${image.name}`
-  const imgPath = join(process.cwd(), 'public', imgFileName)
-
-  const songArrayBuffer = await song.arrayBuffer()
-  const songBuffer = Buffer.from(songArrayBuffer)
-
-  const songFileName = `${Date.now()}${song.name}`
-  const songPath = join(process.cwd(), 'public', songFileName)
+  const { title, lyrics, image, song, genre } = newData
+  console.log(newData)
 
   await prisma.song.create({
     data: {
       title,
       lyrics,
-      image: imgFileName,
-      song: songFileName,
+      image,
+      genre,
+      song,
       artistId: session.userId,
     }
   })
 
-  await fs.writeFile(imgPath, imgBuffer)
-  await fs.writeFile(songPath, songBuffer)
-
+  revalidatePath('/')
   redirect('/')
 }
 
 export async function getSongs() {
-  const songs = await prisma.song.findMany()
+  const songs = await prisma.song.findMany({
+    include: {
+      artist: {
+        select: {
+          name: true,
+        }
+      }
+    }
+  })
   return songs
 }
+

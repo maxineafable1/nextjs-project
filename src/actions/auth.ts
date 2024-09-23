@@ -8,6 +8,7 @@ import { cookies } from "next/headers"
 import bcrypt from 'bcryptjs'
 import { redirect } from "next/navigation"
 import { SignupFormData } from "@/components/user/signup-form"
+import { LoginFormData } from "@/components/user/login-form"
 // import { FormData1 } from "@/components/user/signup-form"
 
 export async function getSession() {
@@ -17,21 +18,10 @@ export async function getSession() {
   return session
 }
 
-export async function login(state: LoginFormState, formData: FormData) {
+export async function login(formData: LoginFormData) {
   const session = await getSession()
 
-  const validatedFields = LoginFormSchema.safeParse({
-    email: formData.get('email'),
-    password: formData.get('password'),
-  })
-
-  if (validatedFields.error) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-    }
-  }
-
-  const { email, password } = validatedFields.data
+  const { email, password } = formData
   const user = await prisma.user.findUnique({
     where: {
       email
@@ -52,18 +42,10 @@ export async function login(state: LoginFormState, formData: FormData) {
   redirect('/')
 }
 
-// state: SignupFormState
 export async function signup(formData: SignupFormData) {
   const session = await getSession()
 
-  const validatedFields = await SignupFormSchema.safeParseAsync(formData)
-
-  if (!validatedFields.success) return
-  // return {
-  //   errors: validatedFields.error.flatten().fieldErrors,
-  // }
-
-  const { name, email, password } = validatedFields.data
+  const { name, email, password } = formData
 
   const hashedPassword = await bcrypt.hash(password, 10)
 

@@ -1,6 +1,7 @@
 import { FieldError, UseFormRegister } from "react-hook-form";
 import { FaSpotify } from "react-icons/fa";
 import { SignupFormData } from "../signup-form";
+import InputForm from "@/components/input-form";
 
 export type Props = {
   register: UseFormRegister<SignupFormData>
@@ -16,14 +17,13 @@ export default function Email({ register, errors }: Props) {
       </div>
       <div className='grid gap-1'>
         <label htmlFor="email" className='font-semibold text-sm'>Email address</label>
-        <input
-          type="text"
+        <InputForm
           id="email"
+          name="email"
+          register={register}
           placeholder="name@domain.com"
-          className="px-3 py-2 rounded bg-inherit border border-white"
-          {...register('email')}
+          errors={errors}
         />
-        {errors && <p className="text-sm text-red-400 mt-1">{errors.message}</p>}
       </div>
     </div>
   )

@@ -1,18 +1,25 @@
+import { getSession } from "@/actions/auth";
 import { getSongs } from "@/actions/song";
-import Card from "@/components/song/card";
-import Player from "@/components/song/player";
+import CardGenre, { SongType } from "@/components/song/card";
 
-// import i from '../../../uploads/'
+type SongsByGenreType = [string, SongType[]][]
 
 export default async function Home() {
+  const session = await getSession()
   const songs = await getSongs()
+
+  // group the songs by genre
+  const songsGenreObj = Object.groupBy(songs, ({ genre }) => genre)
+  const songsByGenre = Object.keys(songsGenreObj).map((key) => [key, songsGenreObj[key]]) as unknown as SongsByGenreType
 
   return (
     <section>
-      <h1 className="font-bold text-2xl mb-4">Made for you</h1>
-      <ul className="grid grid-cols-4">
-        {songs.map(song => (
-          <Card key={song.id} song={song} />
+      <h2 className="font-bold text-2xl mb-4 ml-2">
+        {session.active ? 'Made for you' : 'Popular Genre'}
+      </h2>
+      <ul className="grid xl:grid-cols-5 lg:grid-cols-4 grid-cols-3">
+        {songsByGenre.map(songByGenre => (
+          <CardGenre key={songByGenre[0]} songByGenre={songByGenre} />
         ))}
       </ul>
     </section>

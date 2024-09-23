@@ -5,6 +5,7 @@ import { protectedRoutes, publicRoutes } from "@/middleware"
 import { GoHomeFill } from "react-icons/go";
 import { FaSpotify, FaSearch } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
+import ProfileIcon from "./user/profile-icon";
 
 export default async function Navbar() {
   const session = await getSession()
@@ -21,31 +22,20 @@ export default async function Navbar() {
           <Link href='/' className="bg-neutral-800 p-1.5 rounded-full">
             <GoHomeFill fontSize='2rem' />
           </Link>
-          <form 
+          <form
             action=""
             className="w-full relative"
           >
             <CiSearch className="absolute top-2 left-2" fontSize='2rem' />
-            <input 
-              type="text" 
+            <input
+              type="text"
               placeholder="What do you want to play?"
               className="px-12 py-3 rounded-full bg-neutral-800 text-white w-full"
             />
           </form>
         </li>
         {session.active ? (
-          <>
-            <li>
-              <LogoutForm />
-            </li>
-            <li>
-              <Link 
-                href='/songs/upload'
-                className="text-neutral-400 hover:text-neutral-200 font-bold"
-              >
-                Upload</Link>
-            </li>
-          </>
+          <ProfileIcon />
         ) : (
           <>
             <li className="">
