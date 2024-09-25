@@ -89,7 +89,7 @@ export default function Player() {
           <source src={currentSong.song} type="audio/mpeg" />
         </audio>
       )}
-      <div className="flex flex-col gap-2 items-center justify-center mx-auto w-1/2 lg:w-2/3 max-w-2xl">
+      <div className="flex flex-col gap-2 items-center justify-center mx-auto w-1/3 md:w-1/2 lg:w-2/3 max-w-2xl">
         <div className="flex items-center gap-4">
           <button
             title="Previous"

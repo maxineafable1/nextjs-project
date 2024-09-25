@@ -6,6 +6,7 @@ import Container from "@/components/container";
 import Player from "@/components/song/player";
 import { SongProvider } from "@/contexts/song-context";
 import { getSession } from "@/actions/auth";
+import Sidebar from "@/components/sidebar";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -29,7 +30,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getSession()
-  console.log(session)
 
   return (
     <html lang="en">
@@ -42,10 +42,8 @@ export default async function RootLayout({
         <SongProvider>
           <Container>
             <Navbar />
-            <main className="grid grid-cols-4 gap-2 min-h-dvh mb-4">
-              <div className="bg-neutral-900 rounded-lg p-4">
-                <h2 className="text-neutral-300 font-semibold">Your library</h2>
-              </div>
+            <main className="lg:grid grid-cols-4 gap-2 min-h-screen mb-4">
+              <Sidebar />
               <div className="col-span-3 bg-neutral-900 rounded-lg p-4">
                 {children}
               </div>

@@ -43,7 +43,7 @@ const steps = [
 export default function SignupForm() {
   const { register, formState: { errors }, handleSubmit, trigger } = useForm<SignupFormData>({
     mode: 'all',
-    resolver: zodResolver(SignupFormSchema)
+    resolver: zodResolver(SignupFormSchema),
   })
 
   const onSubmit: SubmitHandler<SignupFormData> = async (data) => {
@@ -83,7 +83,7 @@ export default function SignupForm() {
             </div>
             <ProgressBar barWidth={barWidth[currentIndex]} />
             <div className="flex items-center gap-4 my-4">
-              <BackButton 
+              <BackButton
                 onClick={back}
               />
               <div>

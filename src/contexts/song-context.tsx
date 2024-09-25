@@ -1,13 +1,13 @@
 'use client'
 
-import { SongType } from "@/components/song/card"
+import { SampleTypeForPlaylist, SongType } from "@/components/song/card"
 import React, { createContext, SetStateAction, useContext, useState } from "react"
 
 type SongContextStateType = {
-  currentSong: SongType | null
-  setCurrentSong: React.Dispatch<SetStateAction<SongType | null>>
-  currentAlbum: SongType[]
-  setCurrentAlbum: React.Dispatch<SetStateAction<SongType[]>>
+  currentSong: SampleTypeForPlaylist | null
+  setCurrentSong: React.Dispatch<SetStateAction<SampleTypeForPlaylist | null>>
+  currentAlbum: SampleTypeForPlaylist[]
+  setCurrentAlbum: React.Dispatch<SetStateAction<SampleTypeForPlaylist[]>>
 }
 
 const initSongContextState: SongContextStateType = {
@@ -24,8 +24,8 @@ type SongProviderProps = {
 }
 
 export function SongProvider({ children }: SongProviderProps) {
-  const [currentSong, setCurrentSong] = useState<SongType | null>(null)
-  const [currentAlbum, setCurrentAlbum] = useState<SongType[]>([])
+  const [currentSong, setCurrentSong] = useState<SampleTypeForPlaylist | null>(null)
+  const [currentAlbum, setCurrentAlbum] = useState<SampleTypeForPlaylist[]>([])
 
   const contextValue = {
     currentSong,

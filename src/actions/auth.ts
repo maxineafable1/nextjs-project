@@ -1,7 +1,6 @@
 'use server'
 
 import prisma from "@/lib/db"
-import { LoginFormSchema, LoginFormState, SignupFormSchema } from "@/lib/definitions"
 import { SessionData, sessionOptions } from "@/lib/session"
 import { getIronSession } from "iron-session"
 import { cookies } from "next/headers"
@@ -38,6 +37,7 @@ export async function login(formData: LoginFormData) {
 
   session.active = true
   session.userId = user.id
+  session.name = user.name as string
   await session.save()
   redirect('/')
 }
@@ -59,6 +59,7 @@ export async function signup(formData: SignupFormData) {
 
   session.active = true
   session.userId = newUser.id
+  session.name = newUser.name as string
   await session.save()
   redirect('/')
 }

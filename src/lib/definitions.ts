@@ -24,6 +24,7 @@ export const SignupFormSchema = z.object({
     .email({ message: 'Please enter a valid email.' })
     .toLowerCase()
     .trim()
+    // TODO: prevent post request when not validating for email
     .refine(async e => await findEmail(e), {
       message: 'User already exists'
     }),
@@ -101,44 +102,20 @@ export const SongFormSchema = z.object({
     )
 })
 
-export type LoginFormState =
-  | {
-    errors?: {
-      email?: string[]
-      password?: string[]
-    }
-    message?: string
-  }
-  | {
-    error: string
-  }
-  | undefined
+export const PlaylistSchema = z.object({
+  song: z
+    .string()
+})
 
-
-// export type SongFormState =
-//   | {
-//     errors?: {
-//       title?: string[]
-//       lyrics?: string[]
-//       cover?: string[]
-//     }
-//     message?: string
-//   }
-//   | {
-//     error: string
-//   }
-//   | undefined
-
-// export type SignupFormState =
-//   | {
-//     errors?: {
-//       name?: string[]
-//       email?: string[]
-//       password?: string[]
-//     }
-//     message?: string
-//   }
-//   | {
-//     error: string
-//   }
-//   | undefined
+export const PlaylistDetailSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .max(100, { message: 'Must be less than 100 characters long' })
+    .trim(),
+  image: z
+    .any()
+    .optional()
+    .refine(file => file.length > 0 ? ACCEPTED_IMAGE_TYPES.includes(file?.[0]?.type) ? true : false : true, { message: 'Only .jpg, .jpeg and .png formats are supported.' })
+    .refine(file => file.length > 0 ? file[0]?.size <= MAX_IMG_FILE_SIZE ? true : false : true, { message: 'Max file size allowed is 5MB.' })
+})

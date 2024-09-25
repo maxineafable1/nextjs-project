@@ -2,6 +2,7 @@ import { SessionOptions } from 'iron-session'
 
 export type SessionData = {
   userId: string
+  name: string
   active: boolean
 }
 

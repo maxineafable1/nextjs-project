@@ -14,20 +14,33 @@ datasource db {
 }
 
 model Song {
-  id       String @id @default(auto()) @map("_id") @db.ObjectId
-  title    String
-  lyrics   String
-  image    String
-  song     String
-  genre    String
-  artist   User   @relation(fields: [artistId], references: [id])
-  artistId String @db.ObjectId
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  lyrics      String
+  image       String
+  song        String
+  genre       String
+  artist      User       @relation(fields: [artistId], references: [id])
+  artistId    String     @db.ObjectId
+  playlists   Playlist[] @relation(fields: [playlistIds], references: [id])
+  playlistIds String[]   @db.ObjectId
 }
 
 model User {
-  id       String  @id @default(auto()) @map("_id") @db.ObjectId
-  email    String  @unique
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  email    String     @unique
   name     String?
   password String
   Song     Song[]
+  Playlist Playlist[]
+}
+
+model Playlist {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  name    String
+  image   String?
+  user    User     @relation(fields: [userId], references: [id])
+  userId  String   @db.ObjectId
+  songs   Song[]   @relation(fields: [songIds], references: [id])
+  songIds String[] @db.ObjectId
 }
