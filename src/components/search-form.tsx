@@ -89,7 +89,6 @@ export default function SearchForm({ setPlaylistSong, handleSubmit, onSubmit, re
                 className="rounded-full border border-neutral-400 hover:border-white hover:scale-105 font-semibold px-3 py-1"
                 ref={ref}
                 onClick={() => {
-                  console.log('click add')
                   setPlaylistSong('song', song.id)
                 }}
               >

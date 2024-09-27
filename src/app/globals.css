@@ -39,7 +39,7 @@
   }
 
   .song-slider:hover::-moz-range-progress {
-    @apply bg-green-500 
+    @apply bg-green-500
   }
 
   input[type="file"] {
@@ -51,5 +51,18 @@
   } */
   dialog::backdrop {
     background-color: rgba(0, 0, 0, 0.8);
+  }
+
+  /* pop up arrow */
+  .div-pop-up::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    translate: -0.5rem 3.5rem;
+    width: 0;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    @apply border-r-8 border-r-sky-600
   }
 }

@@ -12,17 +12,29 @@ import { PlaylistDetailSchema } from "@/lib/definitions"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { updatePlaylistDetails } from "@/actions/song"
 import { useParams } from "next/navigation"
-
+import Link from "next/link"
 
 type HeaderProps = {
   image: string | undefined | null
   name: string | undefined
   user: string | undefined | null
+  count: number | undefined
+  totalDuration: number | undefined
+  active: boolean
+  userId: string | undefined
 }
 
 type PlaylistDetailData = z.infer<typeof PlaylistDetailSchema>
 
-export default function Header({ image, name, user }: HeaderProps) {
+export default function Header({
+  image,
+  name,
+  user,
+  count,
+  totalDuration,
+  active,
+  userId,
+}: HeaderProps) {
   const { dialogRef, isOpen, setIsOpen } = useModal()
   const [isEditPhoto, setIsEditPhoto] = useState(false)
   const [photoValue, setPhotoValue] = useState<File | null>(null)
@@ -34,11 +46,18 @@ export default function Header({ image, name, user }: HeaderProps) {
 
   const { onChange, name: registerName, ref } = register('image')
 
-  const { id: userId } = useParams()
+  // USER ID OR PLAYLIST ID?
+  const { id: playlistId } = useParams()
+
+  function numToTime(value: number) {
+    const minutes = Math.floor(value / 60)
+    const seconds = Math.trunc(value - minutes * 60)
+    return `${String(minutes).padStart(1, '0')} min ${String(seconds).padStart(2, '0')} sec`
+  }
 
   const onSubmit: SubmitHandler<PlaylistDetailData> = async (data) => {
     try {
-      const updatePlaylistDetailsWithId = updatePlaylistDetails.bind(null, userId as string)
+      const updatePlaylistDetailsWithId = updatePlaylistDetails.bind(null, playlistId as string)
       if (data.image[0]) {
         const formData = new FormData()
         formData.append('image', data.image[0])
@@ -68,10 +87,11 @@ export default function Header({ image, name, user }: HeaderProps) {
     <div className="flex items-center gap-6">
       <div
         className="w-36 aspect-square block"
-        onMouseEnter={() => setIsEditPhoto(true)}
-        onMouseLeave={() => setIsEditPhoto(false)}
+        onMouseEnter={() => active && setIsEditPhoto(true)}
+        onMouseLeave={() => active && setIsEditPhoto(false)}
         onClick={() => {
-          isEditPhoto && setIsOpen(true)
+          if (active)
+            isEditPhoto && setIsOpen(true)
         }}
       >
         {image ? (
@@ -117,21 +137,40 @@ export default function Header({ image, name, user }: HeaderProps) {
         )}
       </div>
       <div>
-        <button
-          className="text-7xl font-extrabold mb-8"
-          onClick={() => setIsOpen(true)}
+        <h2
+          className={`text-7xl font-extrabold mb-8 ${active && 'cursor-pointer'}`}
+          onClick={() => active && setIsOpen(true)}
         >
-          {name}</button>
-        <p className="font-semibold text-sm">{user}</p>
+          {name}</h2>
+        <div className="flex items-center gap-2 text-sm">
+          <Link 
+            href={`/artist/${userId}`} 
+            className="font-semibold hover:underline"
+          >
+            {user}
+          </Link>
+          <p className="text-neutral-400">
+            {(count !== 0) ? count === 1 ? `${count} song` : `${count} songs` : null}
+            <span>
+              {totalDuration && `, ${numToTime(totalDuration)}`}
+            </span>
+          </p>
+        </div>
       </div>
       <dialog
         ref={dialogRef}
         className="bg-neutral-800 p-4 rounded text-white"
       >
-        <div className="border border-white">
+        <div>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Edit details</h2>
-            <button>
+            <button
+              onClick={() => {
+                console.log('close click')
+                dialogRef.current?.close()
+                setIsOpen(false)
+              }}
+            >
               <IoClose fontSize='1.5rem' />
             </button>
           </div>

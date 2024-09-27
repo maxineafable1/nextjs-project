@@ -119,3 +119,16 @@ export const PlaylistDetailSchema = z.object({
     .refine(file => file.length > 0 ? ACCEPTED_IMAGE_TYPES.includes(file?.[0]?.type) ? true : false : true, { message: 'Only .jpg, .jpeg and .png formats are supported.' })
     .refine(file => file.length > 0 ? file[0]?.size <= MAX_IMG_FILE_SIZE ? true : false : true, { message: 'Max file size allowed is 5MB.' })
 })
+
+export const ArtistInfoSchema = z.object({
+  name: z
+    .string()
+    .min(1, { message: 'Name is required' })
+    .max(100, { message: 'Must be less than 100 characters long' })
+    .trim(),
+  image: z
+    .any()
+    .optional()
+    .refine(file => file.length > 0 ? ACCEPTED_IMAGE_TYPES.includes(file?.[0]?.type) ? true : false : true, { message: 'Only .jpg, .jpeg and .png formats are supported.' })
+    .refine(file => file.length > 0 ? file[0]?.size <= MAX_IMG_FILE_SIZE ? true : false : true, { message: 'Max file size allowed is 5MB.' })
+})

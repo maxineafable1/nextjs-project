@@ -26,8 +26,8 @@ export default function PlaylistCard({ songs, albumName, playlistImage, albumId 
     <Link
       href={`/playlist/${albumId}`}
       className={`
-        flex items-center gap-4 hover:bg-neutral-800 rounded p-2
-        ${albumId === id && 'bg-neutral-700'}
+        flex items-center gap-4 hover:bg-neutral-700 rounded p-2
+        ${albumId === id && 'bg-neutral-600'}
       `}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}

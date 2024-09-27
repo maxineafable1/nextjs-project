@@ -18,12 +18,12 @@ export default function PlaylistForm() {
     resolver: zodResolver(PlaylistSchema)
   })
 
-  const { id: userId } = useParams()
+  const { id: playlistId } = useParams()
   const [isFindMore, setIsFindMore] = useState(false)
 
   const onSubmit: SubmitHandler<PlaylistFormData> = async (data) => {
     try {
-      const updatePlaylistWithId = updatePlaylist.bind(null, userId as string)
+      const updatePlaylistWithId = updatePlaylist.bind(null, playlistId as string)
       const res = await updatePlaylistWithId(data.song)
       console.log(res)
     } catch (error) {
@@ -33,22 +33,6 @@ export default function PlaylistForm() {
 
   return (
     <div className="flex flex-col">
-      {/* <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="grid gap-1"
-      >
-        <label
-          htmlFor="name"
-          className="text-sm font-semibold"
-        >
-          Playlist Name</label>
-        <InputForm
-          id="name"
-          register={register}
-          name="name"
-          errors={errors.name}
-        />
-      </form> */}
       <button
         className={`
           mt-4 font-semibold self-end text-sm

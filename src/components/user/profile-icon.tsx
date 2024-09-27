@@ -3,30 +3,33 @@
 import Link from "next/link"
 import LogoutForm from "./logout-form"
 import { Fragment, useEffect, useRef, useState } from "react"
-
-const dropdownList = [
-  <Link
-    href='/songs/upload'
-    className="w-full block"
-  >
-    Upload
-  </Link>,
-  <Link
-    href='/profile'
-    className="w-full block"
-  >
-    Profile
-  </Link>,
-  <LogoutForm />,
-]
+import Image from "next/image"
 
 type ProfileIconProps = {
   name: string
+  image: string | null | undefined
+  userId: string
 }
 
-export default function ProfileIcon({ name }: ProfileIconProps) {
+export default function ProfileIcon({ name, image, userId }: ProfileIconProps) {
   const [isOpen, setIsOpen] = useState(false)
   const divRef = useRef<HTMLDivElement>(null)
+
+  const dropdownList = [
+    <Link
+      href='/songs/upload'
+      className="w-full block"
+    >
+      Upload
+    </Link>,
+    <Link
+      href={`/artist/${userId}`}
+      className="w-full block"
+    >
+      Profile
+    </Link>,
+    <LogoutForm />,
+  ]
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -45,13 +48,25 @@ export default function ProfileIcon({ name }: ProfileIconProps) {
       ref={divRef}
       className="relative"
     >
-      <div
-        title={name}
-        onClick={() => setIsOpen(true)}
-        className="bg-orange-500 rounded-full text-lg font-bold p-1 px-2.5 hover:scale-105 cursor-pointer text-black"
-      >
-        {name[0].toUpperCase()}
-      </div>
+      {image ? (
+        <Image
+          src={`/${image}`}
+          alt=""
+          height={500}
+          width={500}
+          title={name}
+          onClick={() => setIsOpen(true)}
+          className="rounded-full max-w-10 aspect-square object-cover hover:opacity-80 cursor-pointer"
+        />
+      ) : (
+        <div
+          title={name}
+          onClick={() => setIsOpen(true)}
+          className="bg-orange-500 rounded-full text-lg font-bold p-1 px-2.5 hover:scale-105 cursor-pointer text-black"
+        >
+          {name[0].toUpperCase()}
+        </div>
+      )}
       <ul
         className={`
           absolute bg-neutral-800 rounded shadow p-2 right-0 z-10

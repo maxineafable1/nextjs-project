@@ -6,6 +6,7 @@ import { useSongContext } from "@/contexts/song-context"
 import Image from "next/image"
 import useModal from "@/hooks/useModal"
 import Link from "next/link"
+import { FaUser } from "react-icons/fa";
 
 export type SongType = {
   id: string;
@@ -35,43 +36,51 @@ export type SampleTypeForPlaylist = {
 }
 
 type CardProps = {
-  // songByGenre: [string, SongType[]]
   songs: SampleTypeForPlaylist[]
   active: boolean
-  name: string
-  albumId: string
-  playlistImage: string | null
+  name: string | null
+  albumId?: string
+  artistId?: string
+  playlistImage?: string | null
+  roundedCard?: boolean
 }
 
-export default function CardGenre({ songs, active, name, albumId, playlistImage }: CardProps) {
+export default function CardGenre({
+  songs,
+  active,
+  name,
+  albumId,
+  playlistImage,
+  artistId,
+  roundedCard
+}: CardProps) {
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
-  const { dialogRef, setIsOpen } = useModal()
+  const { dialogRef, isOpen, setIsOpen } = useModal()
   const [isHover, setIsHover] = useState(false)
 
   const random = Math.floor(Math.random() * songs.length)
 
   return (
     <li
-      // href={`/playlist/${albumId}`}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       className="hover:bg-neutral-800 p-2 block rounded relative"
     >
-      <Link href={`/playlist/${albumId}`}>
+      <Link href={albumId ? `/playlist/${albumId}` : `/artist/${artistId}`}>
         {playlistImage ? (
           <Image
             src={`/${playlistImage}`}
             alt=""
             width={500}
             height={500}
-            className="aspect-square object-cover block rounded-md"
+            className={`aspect-square object-cover block ${roundedCard ? 'rounded-full' : 'rounded-md'}`}
           />
         ) : (
           <div className="bg-neutral-700 w-full aspect-square rounded text-6xl flex flex-col gap-1 items-center justify-center">
-            <FaMusic className="text-neutral-400" />
+            <FaUser className="text-neutral-400" />
           </div>
         )}
-        <p className="text-neutral-300 mt-2 text-sm">
+        <p className="text-neutral-400 hover:text-white hover:underline mt-2 text-sm">
           {name}
         </p>
       </Link>
@@ -90,34 +99,39 @@ export default function CardGenre({ songs, active, name, albumId, playlistImage 
         >
           <FaPlay fill="black" /></button>
       )}
-      <dialog
-        ref={dialogRef}
-        className="text-white max-w-screen-md rounded-lg"
-      >
-        <div className="bg-neutral-800 p-16 flex gap-8">
-          <Image
-            src={`/${songs.at(0)?.image}`}
-            alt=""
-            width={500}
-            height={500}
-            className="aspect-square object-cover block rounded-md max-w-80"
-          />
-          <div className="text-center flex flex-col items-center">
-            <h2 className="text-3xl font-bold mb-8">Start listening with a free Spotify account</h2>
-            <Link
-              href='/signup'
-              className="bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 text-black rounded-full font-bold"
-            >
-              Sign up free</Link>
-            <p className="mt-auto text-neutral-400 text-sm">
-              Already have an account?
-              <Link href='/login' className="text-white font-semibold ml-2 underline hover:text-green-400">
-                Login
-              </Link>
-            </p>
+      {isOpen && (
+        <dialog
+          ref={dialogRef}
+          className="text-white max-w-screen-md rounded-lg relative"
+        >
+          <div className="bg-neutral-800 p-16 flex items-center gap-8">
+            <Image
+              src={playlistImage ? `/${playlistImage}` : `/${songs.at(0)?.image}`}
+              alt=""
+              width={500}
+              height={500}
+              className="aspect-square object-cover block rounded-md max-w-72"
+            />
+            <div className="flex flex-col gap-8 items-center">
+              <h2 className="text-3xl text-center font-bold">
+                Start listening with a free Spotify account
+              </h2>
+              <Link
+                href='/signup'
+                className="bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 text-black rounded-full font-bold"
+              >
+                Sign up free</Link>
+              <p className="text-neutral-400 text-sm">
+                Already have an account?
+                <Link href='/login' className="text-white font-semibold ml-2 underline hover:text-green-400">
+                  Login
+                </Link>
+              </p>
+            </div>
           </div>
-        </div>
-      </dialog>
+          <button className="fixed mt-4 left-1/2 font-semibold text-neutral-400 hover:text-white hover:scale-105">Close</button>
+        </dialog>
+      )}
     </li>
   )
 }

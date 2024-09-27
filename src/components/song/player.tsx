@@ -65,7 +65,7 @@ export default function Player() {
       {currentSong && (
         <div className="flex items-center gap-3 w-1/4 lg:w-fit">
           <img
-            src={currentSong?.image}
+            src={`/${currentSong?.image}`}
             alt=""
             className="block aspect-square object-cover max-w-14 rounded-md"
           />
@@ -86,10 +86,10 @@ export default function Player() {
           }}
           preload="metadata"
         >
-          <source src={currentSong.song} type="audio/mpeg" />
+          <source src={`/${currentSong.song}`} type="audio/mpeg" />
         </audio>
       )}
-      <div className="flex flex-col gap-2 items-center justify-center mx-auto w-1/3 md:w-1/2 lg:w-2/3 max-w-2xl">
+      <div className="flex flex-col gap-2 items-center justify-center mx-auto w-80">
         <div className="flex items-center gap-4">
           <button
             title="Previous"

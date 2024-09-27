@@ -4,9 +4,23 @@ import { GoHomeFill } from "react-icons/go";
 import { FaSpotify, FaSearch } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import ProfileIcon from "./user/profile-icon";
+import prisma from "@/lib/db";
 
 export default async function Navbar() {
   const session = await getSession()
+  const user = session.active ? await prisma.user.findUnique({
+    where: {
+      id: session.userId
+    },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      email: true,
+    }
+  }) : undefined
+
+  console.log(user)
 
   return (
     <nav className="p-4">
@@ -33,7 +47,11 @@ export default async function Navbar() {
           </form>
         </li>
         {session.active ? (
-          <ProfileIcon name={session.name} />
+          <ProfileIcon
+            name={session.name}
+            image={user?.image}
+            userId={session.userId}
+          />
         ) : (
           <>
             <li className="">

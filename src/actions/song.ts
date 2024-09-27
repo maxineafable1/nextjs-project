@@ -98,9 +98,10 @@ export async function getPlaylist() {
   return playlists
 }
 
-export async function updatePlaylist(userId: string, songId: string) {
+export async function updatePlaylist(playlistId: string, songId: string) {
   const exists = await prisma.playlist.findFirst({
     where: {
+      id: playlistId,
       songIds: {
         has: songId
       }
@@ -111,7 +112,7 @@ export async function updatePlaylist(userId: string, songId: string) {
 
   const playlist = await prisma.playlist.update({
     where: {
-      id: userId,
+      id: playlistId,
     },
     data: {
       songIds: {

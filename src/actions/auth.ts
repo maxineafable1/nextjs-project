@@ -8,6 +8,7 @@ import bcrypt from 'bcryptjs'
 import { redirect } from "next/navigation"
 import { SignupFormData } from "@/components/user/signup-form"
 import { LoginFormData } from "@/components/user/login-form"
+import { revalidatePath } from "next/cache"
 // import { FormData1 } from "@/components/user/signup-form"
 
 export async function getSession() {
@@ -77,4 +78,18 @@ export async function findEmail(email: string) {
     }
   })
   return user?.email !== email
+}
+
+export async function updateUserInfo(userId: string, name: string, image?: string) {
+  const user = await prisma.user.update({
+    where: {
+      id: userId
+    },
+    data: {
+      name,
+      image,
+    }
+  })
+
+  revalidatePath(`/artist/${user.id}`)
 }
