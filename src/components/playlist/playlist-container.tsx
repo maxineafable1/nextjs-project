@@ -32,11 +32,13 @@ export default function PlaylistContainer({ playlistSongs, active }: PlaylistCon
         totalDuration={totalDuration}
         active={active}
         userId={playlistSongs?.userId}
+        
       />
       <SonglistCard
         songs={playlistSongs?.songs}
         active={active}
         image={playlistSongs?.image}
+        playlistName={playlistSongs?.name}
         // totalDuration={totalDuration}
         setTotalDuration={setTotalDuration}
       />

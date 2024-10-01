@@ -17,6 +17,7 @@ export default function Player() {
   const [volume, setVolume] = useState(0.5)
 
   const audioRef = useRef<HTMLAudioElement>(null)
+  const volumeRef = useRef<HTMLInputElement>(null)
 
   function numToTime(value: number) {
     const minutes = Math.floor(value / 60)
@@ -37,7 +38,6 @@ export default function Player() {
     const audio = audioRef.current
 
     function getCurrSongDuration() {
-      console.log(audio.duration)
       setDuration(audio.duration)
     }
 
@@ -59,6 +59,16 @@ export default function Player() {
 
     song.volume = volume
   }, [isMuted, volume, currentSong?.song])
+
+  useEffect(() => {
+    // turns off player when playlist ends
+    const truncDuration = Math.trunc(duration)
+    if (currentTime === truncDuration) {
+      const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
+      if (currentIndex === currentAlbum.length - 1)
+        setPlaying(false)
+    }
+  }, [currentTime, duration])
 
   return (
     <div className="bg-black fixed w-full p-4 bottom-0 h-20 flex items-center gap-8">
@@ -85,6 +95,11 @@ export default function Player() {
             setCurrentTime(newTime)
           }}
           preload="metadata"
+          onEnded={() => {
+            const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
+            if (currentIndex < currentAlbum.length - 1)
+              setCurrentSong(currentAlbum[currentIndex + 1])
+          }}
         >
           <source src={`/${currentSong.song}`} type="audio/mpeg" />
         </audio>
@@ -104,7 +119,7 @@ export default function Player() {
           </button>
           <button
             disabled={!currentSong}
-            title={playing ? 'Pause': 'Play'}
+            title={playing ? 'Pause' : 'Play'}
             onClick={() => {
               setPlaying(prev => !prev)
             }}
@@ -158,14 +173,26 @@ export default function Player() {
           {isMuted ? <CiVolumeMute /> : <CiVolumeHigh />}
         </button>
         <input
+          ref={volumeRef}
           type="range"
           min="0"
           max="1"
-          step="0.01"
+          step="0.1"
           value={volume}
           disabled={!currentSong}
           onChange={e => {
             const newVol = e.target.valueAsNumber
+            setIsMuted(false)
+            setVolume(() => {
+              if (newVol === 0) {
+                setIsMuted(true)
+              }
+              return newVol
+            })
+          }}
+          onMouseOver={e => e.currentTarget.focus()}
+          onScroll={e => {
+            const newVol = e.currentTarget.valueAsNumber
             setIsMuted(false)
             setVolume(() => {
               if (newVol === 0) {

@@ -5,6 +5,7 @@ import { FaSpotify, FaSearch } from "react-icons/fa";
 import { CiSearch } from "react-icons/ci";
 import ProfileIcon from "./user/profile-icon";
 import prisma from "@/lib/db";
+import HomeButton from "./home-btn";
 
 export default async function Navbar() {
   const session = await getSession()
@@ -20,8 +21,6 @@ export default async function Navbar() {
     }
   }) : undefined
 
-  console.log(user)
-
   return (
     <nav className="p-4">
       <ul className="flex items-center gap-4">
@@ -31,9 +30,7 @@ export default async function Navbar() {
           </Link>
         </li>
         <li className="flex items-center gap-2 mx-auto w-[420px]">
-          <Link href='/' className="bg-neutral-800 p-1.5 rounded-full block hover:scale-105">
-            <GoHomeFill fontSize='2rem' />
-          </Link>
+          <HomeButton />
           <form
             action=""
             className="w-full relative"

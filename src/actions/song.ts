@@ -136,3 +136,62 @@ export async function updatePlaylistDetails(userId: string, name: string, image?
   })
   revalidatePath(`/playlist/${playlist.id}`)
 }
+
+export async function deletePlaylist(playlistId: string) {
+  const exists = await prisma.playlist.findFirst({
+    where: {
+      id: playlistId
+    }
+  })
+
+  if (!exists) return
+
+  const playlist = await prisma.playlist.delete({
+    where: {
+      id: playlistId
+    }
+  })
+
+  redirect('/')
+}
+
+export async function deleteSongFromPlaylist(playlistId: string, songId: string) {
+  const exists = await prisma.playlist.findUnique({
+    where: {
+      id: playlistId
+    },
+    select: {
+      songIds: true
+    }
+  })
+
+  if (!exists) return
+
+  // const newSongs = exists.songs.filter(song => song.id !== songId)
+
+  const playlist = await prisma.playlist.update({
+    where: {
+      id: playlistId,
+    },
+    data: {
+      songIds: exists.songIds.filter(song => song !== songId)
+    }
+  })
+
+  revalidatePath(`/playlist/${playlist.id}`)
+}
+
+export async function deleteSong(songId: string) {
+  const session = await getSession()
+
+  await prisma.song.delete({
+    where: {
+      artist: {
+        id: session.userId
+      },
+      id: songId
+    }
+  })
+
+  revalidatePath(`/artist/${session.userId}`)
+}

@@ -8,6 +8,7 @@ import { FaPlay } from "react-icons/fa";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import SonglistPlayer from "../playlist/songlist-player";
+import ListCompact from "../playlist/list-compact";
 
 type ArtistSongCardProps = {
   songs: SampleTypeForPlaylist[] | undefined
@@ -28,6 +29,7 @@ export default function ArtistSongCard({
   const { dialogRef, isOpen, setIsOpen } = useModal()
 
   const [durations, setDurations] = useState<(number | undefined)[]>([])
+  const [viewAs, setViewAs] = useState<'List' | 'Compact'>('List')
 
   const audioRef = useRef<(HTMLAudioElement | null)[]>([])
 
@@ -73,6 +75,10 @@ export default function ArtistSongCard({
                 Upload
               </Link>
             )}
+            <ListCompact 
+              viewAs={viewAs}
+              setViewAs={setViewAs}
+            />
           </div>
           {isOpen && (
             <dialog
@@ -107,7 +113,7 @@ export default function ArtistSongCard({
               <button className="fixed mt-4 left-1/2 font-semibold text-neutral-400 hover:text-white hover:scale-105">Close</button>
             </dialog>
           )}
-          <h2 className="text-2xl font-bold mb-4">Popular</h2>
+          <h2 className="text-2xl font-bold mb-4">Songs</h2>
           <ul>
             {songs?.map((song, index) => (
               <SonglistPlayer
@@ -125,6 +131,8 @@ export default function ArtistSongCard({
                   }
                 }}
                 active={active}
+                viewAs={viewAs}
+                artistPage={true}
               />
             ))}
           </ul>

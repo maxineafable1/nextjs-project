@@ -55,6 +55,7 @@ export default async function Home() {
             name={artist.name}
             artistId={artist.id}
             playlistImage={artist.image}
+            isArtist={true}
             roundedCard
           />
         ))}
@@ -71,6 +72,7 @@ export default async function Home() {
             name={playlist.name}
             albumId={playlist.id}
             playlistImage={playlist.image}
+            isArtist={false}
           />
         ))}
       </ul>

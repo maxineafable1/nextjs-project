@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { FaMusic, FaPlay } from "react-icons/fa"
 import { useSongContext } from "@/contexts/song-context"
 import Image from "next/image"
@@ -39,6 +39,7 @@ type CardProps = {
   songs: SampleTypeForPlaylist[]
   active: boolean
   name: string | null
+  isArtist: boolean
   albumId?: string
   artistId?: string
   playlistImage?: string | null
@@ -52,13 +53,19 @@ export default function CardGenre({
   albumId,
   playlistImage,
   artistId,
-  roundedCard
+  roundedCard,
+  isArtist,
 }: CardProps) {
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
   const { dialogRef, isOpen, setIsOpen } = useModal()
   const [isHover, setIsHover] = useState(false)
 
   const random = Math.floor(Math.random() * songs.length)
+
+  useEffect(() => {
+    if (isOpen)
+      setIsHover(false)
+  }, [isOpen])
 
   return (
     <li
@@ -76,8 +83,8 @@ export default function CardGenre({
             className={`aspect-square object-cover block ${roundedCard ? 'rounded-full' : 'rounded-md'}`}
           />
         ) : (
-          <div className="bg-neutral-700 w-full aspect-square rounded text-6xl flex flex-col gap-1 items-center justify-center">
-            <FaUser className="text-neutral-400" />
+          <div className="bg-neutral-700 w-full aspect-square rounded text-neutral-400 text-6xl flex flex-col gap-1 items-center justify-center">
+            {isArtist ? <FaUser /> : <FaMusic />}
           </div>
         )}
         <p className="text-neutral-400 hover:text-white hover:underline mt-2 text-sm">
@@ -97,21 +104,28 @@ export default function CardGenre({
           }}
           className="absolute right-4 bottom-12 bg-green-500 p-4 rounded-full hover:scale-110 hover:bg-green-400"
         >
-          <FaPlay fill="black" /></button>
+          <FaPlay fill="black" />
+        </button>
       )}
       {isOpen && (
         <dialog
           ref={dialogRef}
-          className="text-white max-w-screen-md rounded-lg relative"
+          className="text-white bg-neutral-800 rounded-lg max-w-screen-md relative"
         >
-          <div className="bg-neutral-800 p-16 flex items-center gap-8">
-            <Image
-              src={playlistImage ? `/${playlistImage}` : `/${songs.at(0)?.image}`}
-              alt=""
-              width={500}
-              height={500}
-              className="aspect-square object-cover block rounded-md max-w-72"
-            />
+          <div className="p-16 flex items-center gap-8">
+            {playlistImage ? (
+              <Image
+                src={playlistImage ? `/${playlistImage}` : `/${songs.at(0)?.image}`}
+                alt=""
+                width={500}
+                height={500}
+                className="aspect-square object-cover block rounded-md max-w-72"
+              />
+            ) : (
+              <div className="p-6 bg-neutral-700 text-neutral-400 rounded w-full max-w-72 aspect-square text-9xl flex items-center justify-center">
+                {isArtist ? <FaUser /> : <FaMusic />}
+              </div>
+            )}
             <div className="flex flex-col gap-8 items-center">
               <h2 className="text-3xl text-center font-bold">
                 Start listening with a free Spotify account

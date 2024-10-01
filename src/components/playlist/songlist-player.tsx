@@ -4,6 +4,10 @@ import { SampleTypeForPlaylist } from '../song/card'
 import { FaPlay } from 'react-icons/fa'
 import useModal from '@/hooks/useModal'
 import Link from 'next/link'
+import SongEllipsis from '../song/ellipsis'
+import { useParams } from 'next/navigation'
+import { deleteSong } from '@/actions/song'
+// import HoverPlayButton from '../hover-play-btn'
 
 type SonglistPlayerProps = {
   song: SampleTypeForPlaylist
@@ -14,6 +18,8 @@ type SonglistPlayerProps = {
   onClick: () => void
   setTotalDuration?: React.Dispatch<React.SetStateAction<number | undefined>>
   active: boolean
+  viewAs: 'List' | 'Compact'
+  artistPage: boolean
 }
 
 export default function SonglistPlayer({
@@ -25,9 +31,19 @@ export default function SonglistPlayer({
   onClick,
   setTotalDuration,
   active,
+  viewAs,
+  artistPage,
 }: SonglistPlayerProps) {
   const [isHover, setIsHover] = useState(false)
+
   const { dialogRef, isOpen, setIsOpen } = useModal()
+  const { dialogRef: deleteDialogRef, isOpen: isDeleteOpen, setIsOpen: setIsDeleteOpen } = useModal()
+
+  const [isCreate, setIsCreate] = useState(false)
+
+  const { id: playlistId } = useParams()
+
+  const deleteSongWithId = deleteSong.bind(null, song.id)
 
   function numToTime(value: number) {
     const minutes = Math.floor(value / 60)
@@ -37,6 +53,7 @@ export default function SonglistPlayer({
 
   useEffect(() => {
     if (isOpen) {
+      // para di ma-stuck hover pag open ng dialog
       setIsHover(false)
     }
   }, [isOpen])
@@ -45,8 +62,10 @@ export default function SonglistPlayer({
     <li
       key={song.id}
       onMouseEnter={() => setIsHover(true)}
-      onMouseLeave={() => setIsHover(false)}
-      className="flex items-center gap-4 hover:bg-neutral-800 py-2 px-4 rounded"
+      onMouseLeave={() => !isCreate && setIsHover(false)}
+      className={`flex items-center gap-4 py-2 px-4 rounded
+        ${isHover && 'bg-neutral-700'}
+      `}
     >
       <div className="w-5 text-center">
         {isHover ? (
@@ -111,25 +130,91 @@ export default function SonglistPlayer({
             const list = audioRef.current.map(audio => audio?.duration)
             if (list.length > 0) {
               setDurations(list)
-              setTotalDuration && setTotalDuration(list.reduce((a, b) => a! + b!, 0))
+              setTotalDuration?.(list.filter(l => l != null).reduce((a, b) => a + b, 0))
             }
           }}
         ></audio>
-        <Image
-          src={`/${song.image}`}
-          alt=""
-          width={500}
-          height={500}
-          className="aspect-square max-w-10 object-cover block rounded-md"
-        />
-        <div>
-          <p>{song.title}</p>
-          <p className="text-neutral-400 text-sm">{song.artist.name}</p>
-        </div>
+        {viewAs === 'List' ? (
+          <>
+            <Image
+              src={`/${song.image}`}
+              alt=""
+              width={500}
+              height={500}
+              className="aspect-square max-w-10 object-cover block rounded-md"
+            />
+            <div>
+              <p className='hover:underline'>{song.title}</p>
+              <Link
+                href={`/artist/${song.artistId}`}
+                className={`
+                text-neutral-400 text-sm hover:underline block
+                ${isHover && 'text-white'}
+              `}
+              >
+                {song.artist.name}
+              </Link>
+            </div>
+          </>
+        ) : (
+          <p className='hover:underline'>{song.title}</p>
+        )}
         <div className="ml-auto text-sm">
           {durations[index] && numToTime(durations[index])}
         </div>
       </div>
+      <div className="w-5 text-center">
+        {isHover && (
+          <SongEllipsis
+            active={active}
+            isCreate={isCreate}
+            setIsCreate={setIsCreate}
+            setIsHover={setIsHover}
+            playlistId={playlistId}
+            songId={song.id}
+            artistId={song.artistId}
+            artistPage={artistPage}
+            isDeleteOpen={isDeleteOpen}
+            setIsDeleteOpen={setIsDeleteOpen}
+          />
+        )}
+      </div>
+      {isDeleteOpen && (
+        <dialog
+          ref={deleteDialogRef}
+          className='bg-white p-6 rounded-lg overflow-hidden w-full max-w-md'
+        >
+          <div className='flex flex-col gap-2 w-full'>
+            <h2 className='font-bold text-2xl self-start'>Delete this track?</h2>
+            <p className='text-sm self-start'>
+              This will delete
+              <span className='font-bold mx-1'>
+                {song.title}
+              </span>
+              from your songs.
+            </p>
+            <div className='flex items-center mt-4 gap-6 self-end'>
+              <button
+                onClick={() => {
+                  deleteDialogRef.current?.close()
+                  setIsDeleteOpen(false)
+                }}
+                className='font-bold hover:scale-105'
+              >
+                Cancel
+              </button>
+              <form action={deleteSongWithId}>
+                <button
+                  className='bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 rounded-full font-bold'
+                  type='submit'
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        </dialog>
+      )}
     </li>
   )
 }

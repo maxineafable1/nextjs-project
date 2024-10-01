@@ -9,18 +9,29 @@ import { useSongContext } from "@/contexts/song-context"
 import useModal from "@/hooks/useModal"
 import Image from "next/image"
 import Link from "next/link"
+import Ellipsis from "../ellipsis"
+import ListCompact from "./list-compact"
 
 type SonglistCardProps = {
   songs: SampleTypeForPlaylist[] | undefined
   active: boolean
   setTotalDuration: React.Dispatch<React.SetStateAction<number | undefined>>
   image: string | null | undefined
+  playlistName: string | undefined
 }
 
-export default function SonglistCard({ songs, active, setTotalDuration, image }: SonglistCardProps) {
+export default function SonglistCard({
+  songs,
+  active,
+  setTotalDuration,
+  image,
+  playlistName,
+  
+}: SonglistCardProps) {
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
   const { dialogRef, isOpen, setIsOpen } = useModal()
   const [durations, setDurations] = useState<(number | undefined)[]>([])
+  const [viewAs, setViewAs] = useState<'List' | 'Compact'>('List')
 
   const audioRef = useRef<(HTMLAudioElement | null)[]>([])
 
@@ -32,7 +43,7 @@ export default function SonglistCard({ songs, active, setTotalDuration, image }:
     const list = audios.map(audio => !isNaN(audio?.duration!) ? audio?.duration : undefined)
     if (list.length > 0) {
       setDurations(list)
-      setTotalDuration(list.reduce((a, b) => a! + b!, 0))
+      setTotalDuration(list.filter(l => l != null).reduce((a, b) => a! + b!, 0))
     }
 
   }, [songs?.length])
@@ -41,20 +52,32 @@ export default function SonglistCard({ songs, active, setTotalDuration, image }:
     <>
       {songs?.length !== 0 && (
         <>
-          <button
-            onClick={e => {
-              if (!songs) return
-              const random = Math.floor(Math.random() * songs?.length)
-              if (active) {
-                setCurrentSong(songs[random])
-                setCurrentAlbum(songs)
-              } else {
-                setIsOpen(true)
-              }
-            }}
-            className="bg-green-500 p-4 my-4 rounded-full hover:scale-110 hover:bg-green-400"
-          >
-            <FaPlay fill="black" /></button>
+          <div className="flex items-center gap-6">
+            <button
+              onClick={e => {
+                if (!songs) return
+                const random = Math.floor(Math.random() * songs?.length)
+                if (active) {
+                  setCurrentSong(songs[random])
+                  setCurrentAlbum(songs)
+                } else {
+                  setIsOpen(true)
+                }
+              }}
+              className="bg-green-500 p-4 my-4 rounded-full hover:scale-110 hover:bg-green-400"
+            >
+              <FaPlay fill="black" />
+            </button>
+            <Ellipsis
+              playlistName={playlistName}
+              image={image}
+              active={active}
+            />
+            <ListCompact 
+              viewAs={viewAs}
+              setViewAs={setViewAs}
+            />
+          </div>
           {isOpen && (
             <dialog
               ref={dialogRef}
@@ -91,7 +114,7 @@ export default function SonglistCard({ songs, active, setTotalDuration, image }:
           <div className="p-2 px-4 flex items-center gap-4 text-sm text-neutral-400">
             <p className="w-5 text-center">#</p>
             <p>Title</p>
-            <p className="ml-auto" title="Duration">
+            <p className="ml-auto mr-10" title="Duration">
               <IoTimeOutline fontSize='1.125rem' />
             </p>
           </div>
@@ -116,6 +139,8 @@ export default function SonglistCard({ songs, active, setTotalDuration, image }:
             }}
             setTotalDuration={setTotalDuration}
             active={active}
+            viewAs={viewAs}
+            artistPage={false}
           />
         ))}
       </ul>

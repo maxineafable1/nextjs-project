@@ -24,9 +24,16 @@ export default function useModal() {
       }
     }
 
+    function preventEscEnterKey(e: KeyboardEvent) {
+      const key = e.key.toLowerCase()
+      if (key === 'enter' || key === 'escape') e.preventDefault()
+    }
+
     dialog?.addEventListener("click", closeModal)
+    dialog?.addEventListener('keydown', preventEscEnterKey)
     return () => {
       dialog?.removeEventListener('click', closeModal)
+      dialog?.removeEventListener('keydown', preventEscEnterKey)
     }
   }, [isOpen])
 
