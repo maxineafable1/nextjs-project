@@ -7,7 +7,8 @@ export default async function page({ params: { id } }: { params: { id: string }}
   const session = await getSession()
   const playlistSongs = await prisma.playlist.findUnique({
     where: {
-      id
+      id,
+      category: { equals: 'Playlist' },
     },
     include: {
       songs: {
@@ -16,6 +17,11 @@ export default async function page({ params: { id } }: { params: { id: string }}
             select: {
               name: true
             }
+          },
+          playlists: {
+            select: {
+              name: true
+            },
           }
         }
       },
@@ -26,16 +32,18 @@ export default async function page({ params: { id } }: { params: { id: string }}
       }
     }
   })
-  console.log(playlistSongs)
+  // console.log(playlistSongs)
 
   return (
     <div>
       <PlaylistContainer 
         playlistSongs={playlistSongs}
         active={session.active}
+        category={playlistSongs?.category}
+        currUserId={session.userId}
       />
       {(session.active && playlistSongs?.userId === session.userId) && (
-        <PlaylistForm />
+        <PlaylistForm category={playlistSongs.category} />
       )}
     </div>
   )

@@ -127,7 +127,7 @@ export default function ArtistHeader({
       </div>
       <div>
         <h2
-          className={`text-7xl font-extrabold mb-8 ${active && 'cursor-pointer'}`}
+          className={`text-7xl font-extrabold mb-8 ${validUser && 'cursor-pointer'}`}
           onClick={() => validUser && setIsOpen(true)}
         >
           {name}
@@ -242,7 +242,7 @@ export default function ArtistHeader({
                             <p className="text-sm">Choose photo</p>
                           </>
                         ) : (
-                          <FaMusic className="text-neutral-400" />
+                          <FaUser className="text-neutral-400" />
                         )}
                       </div>
                     )}
@@ -265,7 +265,7 @@ export default function ArtistHeader({
               />
               <div className="flex flex-col justify-between gap-1">
                 <div className="grid gap-1">
-                  <label htmlFor="name" className="font-semibold text-sm">Playlist Name</label>
+                  <label htmlFor="name" className="font-semibold text-sm">Artist Name</label>
                   <input
                     type="text"
                     id="name"

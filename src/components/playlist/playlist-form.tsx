@@ -12,7 +12,11 @@ import { useState } from "react"
 
 export type PlaylistFormData = z.infer<typeof PlaylistSchema>
 
-export default function PlaylistForm() {
+type PlaylistFormProps = {
+  category: string
+}
+
+export default function PlaylistForm({ category }: PlaylistFormProps) {
   const { register, formState: { errors }, handleSubmit, setValue } = useForm<PlaylistFormData>({
     mode: 'all',
     resolver: zodResolver(PlaylistSchema)
@@ -48,6 +52,7 @@ export default function PlaylistForm() {
           onSubmit={onSubmit}
           register={register}
           setIsFindMore={setIsFindMore}
+          category={category}
         />
       )}
     </div>

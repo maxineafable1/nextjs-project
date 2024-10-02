@@ -18,6 +18,10 @@ type PlaylistCardProps = {
   albumName: string
   playlistImage: string | null
   albumId: string
+  category: string
+  active: boolean
+  playlistUserId: string
+  currUserId: string | undefined
 }
 
 export default function PlaylistCard({
@@ -25,6 +29,10 @@ export default function PlaylistCard({
   albumName,
   playlistImage,
   albumId,
+  category,
+  active,
+  currUserId,
+  playlistUserId,
 }: PlaylistCardProps) {
   const { id: urlPlaylistId } = useParams()
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
@@ -52,15 +60,16 @@ export default function PlaylistCard({
     }
   }, [isCreate])
 
+  const validUser = active && currUserId === playlistUserId
+
   return (
     <div className='relative'>
       <Link
         onContextMenu={e => {
           e.preventDefault()
-          // alert('right click')
-          setIsCreate(true)
+          validUser && setIsCreate(true)
         }}
-        href={`/playlist/${albumId}`}
+        href={`/${category.toLowerCase()}/${albumId}`}
         className={`
         flex items-center gap-4 hover:bg-neutral-700 rounded p-2
         ${albumId === urlPlaylistId && 'bg-neutral-600'}
@@ -122,7 +131,7 @@ export default function PlaylistCard({
         </div>
         <div>
           <p className='font-medium'>{albumName}</p>
-          <p className='text-sm text-neutral-400'>Playlist</p>
+          <p className='text-sm text-neutral-400'>{category}</p>
         </div>
       </Link>
       <div
@@ -190,6 +199,7 @@ export default function PlaylistCard({
           playlistId={albumId}
           image={playlistImage}
           playlistName={albumName}
+          category={category}
         />
       )}
     </div>

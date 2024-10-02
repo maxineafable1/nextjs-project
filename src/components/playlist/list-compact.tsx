@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FaList, FaBars } from "react-icons/fa";
+import { FaCheck } from "react-icons/fa6";
 
 type ListCompactProps = {
   viewAs: 'List' | 'Compact'
@@ -75,7 +76,10 @@ export default function ListCompact({ viewAs, setViewAs }: ListCompactProps) {
               ${view.label === viewAs && 'text-green-400'}
             `}
           >
-            {view.icon} {view.label}
+            {view.icon} {view.label} 
+            <span className="ml-auto">
+              {view.label === viewAs && <FaCheck className="fill-green-400" />}
+            </span>
           </button>
         ))}
       </div>

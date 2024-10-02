@@ -16,6 +16,11 @@ export default async function page({ params: { id } }: { params: { id: string } 
             select: {
               name: true
             }
+          },
+          playlists: {
+            select: {
+              name: true
+            },
           }
         }
       }

@@ -1,33 +1,25 @@
-import { SubmitHandler, useForm } from "react-hook-form"
-import { PlaylistDetailData } from "../playlist/header"
-import { PlaylistDetailSchema } from "@/lib/definitions"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { updatePlaylistDetails } from "@/actions/song"
-import { RefObject, SetStateAction, useState } from "react"
-import { IoClose } from "react-icons/io5"
-import Image from "next/image"
-import { MdEdit } from "react-icons/md"
-import { FaMusic } from "react-icons/fa"
+import React, { RefObject, useState } from 'react'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { PlaylistDetailData } from '../playlist/header'
+import { PlaylistDetailSchema } from '@/lib/definitions'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { createAlbum } from '@/actions/song'
+import Image from 'next/image'
+import { IoClose } from 'react-icons/io5'
+import { MdEdit } from 'react-icons/md'
+import { FaMusic } from 'react-icons/fa'
 
-type EditPlaylistModalProps = {
+type CreateAlbumModalProps = {
   dialogRef: RefObject<HTMLDialogElement>
   isOpen: boolean
-  setIsOpen: React.Dispatch<SetStateAction<boolean>>
-  image: string | undefined | null
-  playlistName: string | undefined
-  playlistId: string | string[]
-  category: string | undefined
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export default function EditPlaylistModal({
+export default function CreateAlbumModal({
   dialogRef,
   isOpen,
   setIsOpen,
-  image,
-  playlistName,
-  playlistId,
-  category,
-}: EditPlaylistModalProps) {
+}: CreateAlbumModalProps) {
   const [isEditPhoto, setIsEditPhoto] = useState(false)
   const [photoValue, setPhotoValue] = useState<File | null>(null)
 
@@ -40,7 +32,6 @@ export default function EditPlaylistModal({
 
   const onSubmit: SubmitHandler<PlaylistDetailData> = async (data) => {
     try {
-      const updatePlaylistDetailsWithId = updatePlaylistDetails.bind(null, playlistId as string)
       if (data.image[0]) {
         const formData = new FormData()
         formData.append('image', data.image[0])
@@ -53,11 +44,9 @@ export default function EditPlaylistModal({
 
         const { imgFileName } = await res.json()
 
-        const updateRes = await updatePlaylistDetailsWithId(data.name, imgFileName)
-        console.log(updateRes)
+        await createAlbum(data.name, imgFileName)
       } else {
-        const updateRes = await updatePlaylistDetailsWithId(data.name)
-        console.log(updateRes)
+        await createAlbum(data.name)
       }
       setIsOpen(false)
     } catch (error) {
@@ -72,7 +61,7 @@ export default function EditPlaylistModal({
     >
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Edit details</h2>
+          <h2 className="text-xl font-semibold">Create album</h2>
           <button
             onClick={() => {
               dialogRef.current?.close()
@@ -132,49 +121,16 @@ export default function EditPlaylistModal({
                 )}
               </div>
             ) : (
-              <>
-                {image ? (
-                  <div className="relative">
-                    {isEditPhoto ? (
-                      <>
-                        <Image
-                          src={`/${image}`}
-                          alt=""
-                          width={500}
-                          height={500}
-                          className={`
-                              aspect-square object-cover block rounded-md
-                              ${isEditPhoto && 'opacity-30'}
-                            `}
-                        />
-                        <div className="absolute top-0 text-6xl flex flex-col gap-1 items-center justify-center p-6">
-                          <MdEdit />
-                          <p className="text-sm">Choose photo</p>
-                        </div>
-                      </>
-                    ) : (
-                      <Image
-                        src={`/${image}`}
-                        alt=""
-                        width={500}
-                        height={500}
-                        className={`aspect-square object-cover block rounded-md`}
-                      />
-                    )}
-                  </div>
+              <div className="p-6 bg-neutral-700 rounded h-full text-6xl flex flex-col gap-1 items-center justify-center">
+                {isEditPhoto ? (
+                  <>
+                    <MdEdit />
+                    <p className="text-sm">Choose photo</p>
+                  </>
                 ) : (
-                  <div className="p-6 bg-neutral-700 rounded h-full text-6xl flex flex-col gap-1 items-center justify-center">
-                    {isEditPhoto ? (
-                      <>
-                        <MdEdit />
-                        <p className="text-sm">Choose photo</p>
-                      </>
-                    ) : (
-                      <FaMusic className="text-neutral-400" />
-                    )}
-                  </div>
+                  <FaMusic className="text-neutral-400" />
                 )}
-              </>
+              </div>
             )}
           </label>
           <input
@@ -193,11 +149,10 @@ export default function EditPlaylistModal({
           />
           <div className="flex flex-col justify-between gap-1">
             <div className="grid gap-1">
-              <label htmlFor="name" className="font-semibold text-sm">{category} Name</label>
+              <label htmlFor="name" className="font-semibold text-sm">Album Name</label>
               <input
                 type="text"
                 id="name"
-                defaultValue={playlistName}
                 {...register('name')}
                 className="px-3 py-2 rounded bg-neutral-700"
               />
@@ -205,7 +160,7 @@ export default function EditPlaylistModal({
             <button
               className="self-end rounded-full bg-white text-black px-6 py-3 font-semibold"
             >
-              Save
+              Create
             </button>
           </div>
         </form>

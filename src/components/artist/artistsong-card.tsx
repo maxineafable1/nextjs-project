@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import SonglistPlayer from "../playlist/songlist-player";
 import ListCompact from "../playlist/list-compact";
+import UnauthModal from "../reusables/unauth-modal";
 
 type ArtistSongCardProps = {
   songs: SampleTypeForPlaylist[] | undefined
@@ -18,9 +19,9 @@ type ArtistSongCardProps = {
   currUserId: string
 }
 
-export default function ArtistSongCard({ 
-  songs, 
-  active, 
+export default function ArtistSongCard({
+  songs,
+  active,
   image,
   urlId,
   currUserId,
@@ -75,43 +76,19 @@ export default function ArtistSongCard({
                 Upload
               </Link>
             )}
-            <ListCompact 
+            <ListCompact
               viewAs={viewAs}
               setViewAs={setViewAs}
             />
           </div>
           {isOpen && (
-            <dialog
-              ref={dialogRef}
-              className="text-white max-w-screen-md rounded-lg relative"
-            >
-              <div className="bg-neutral-800 p-16 flex items-center gap-8">
-                <Image
-                  src={image ? `/${image}` : `/${songs?.at(0)?.image}`}
-                  alt=""
-                  width={500}
-                  height={500}
-                  className="aspect-square object-cover block rounded-md max-w-72"
-                />
-                <div className="flex flex-col gap-8 items-center">
-                  <h2 className="text-3xl text-center font-bold">
-                    Start listening with a free Spotify account
-                  </h2>
-                  <Link
-                    href='/signup'
-                    className="bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 text-black rounded-full font-bold"
-                  >
-                    Sign up free</Link>
-                  <p className="text-neutral-400 text-sm">
-                    Already have an account?
-                    <Link href='/login' className="text-white font-semibold ml-2 underline hover:text-green-400">
-                      Login
-                    </Link>
-                  </p>
-                </div>
-              </div>
-              <button className="fixed mt-4 left-1/2 font-semibold text-neutral-400 hover:text-white hover:scale-105">Close</button>
-            </dialog>
+            <UnauthModal
+              dialogRef={dialogRef}
+              firstSongImage={songs?.at(0)?.image}
+              isArtistIcon={true}
+              playlistImage={image}
+              setIsOpen={setIsOpen}
+            />
           )}
           <h2 className="text-2xl font-bold mb-4">Songs</h2>
           <ul>
@@ -133,6 +110,8 @@ export default function ArtistSongCard({
                 active={active}
                 viewAs={viewAs}
                 artistPage={true}
+                category="Artist"
+                validUser={validUser}
               />
             ))}
           </ul>

@@ -24,19 +24,27 @@ type SearchFormProps = {
   onSubmit: SubmitHandler<PlaylistFormData>
   register: UseFormRegister<PlaylistFormData>
   setIsFindMore: Dispatch<SetStateAction<boolean>>
+  category: string
 }
 
-export default function SearchForm({ setPlaylistSong, handleSubmit, onSubmit, register, setIsFindMore }: SearchFormProps) {
+export default function SearchForm({ 
+  setPlaylistSong, 
+  handleSubmit, 
+  onSubmit, 
+  register, 
+  setIsFindMore,
+  category,
+}: SearchFormProps) {
   const [songs, setSongs] = useState<SearchSongsType>([])
   const [value, setValue] = useState('')
 
   useEffect(() => {
     async function search() {
-      return await searchSong(value)
+      return await searchSong(value, category)
     }
     search().then(songlist => setSongs(songlist))
     console.log('search song post')
-  }, [value])
+  }, [value, category])
 
   const { ref } = register('song')
 

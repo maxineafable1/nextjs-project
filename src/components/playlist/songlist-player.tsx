@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SongEllipsis from '../song/ellipsis'
 import { useParams } from 'next/navigation'
 import { deleteSong } from '@/actions/song'
+import UnauthModal from '../reusables/unauth-modal'
 // import HoverPlayButton from '../hover-play-btn'
 
 type SonglistPlayerProps = {
@@ -20,6 +21,9 @@ type SonglistPlayerProps = {
   active: boolean
   viewAs: 'List' | 'Compact'
   artistPage: boolean
+  albumName?: string | null
+  category: string | undefined
+  validUser: boolean
 }
 
 export default function SonglistPlayer({
@@ -33,6 +37,9 @@ export default function SonglistPlayer({
   active,
   viewAs,
   artistPage,
+  albumName,
+  category,
+  validUser,
 }: SonglistPlayerProps) {
   const [isHover, setIsHover] = useState(false)
 
@@ -85,37 +92,12 @@ export default function SonglistPlayer({
         )}
       </div>
       {isOpen && (
-        <dialog
-          ref={dialogRef}
-          className="text-white max-w-screen-md rounded-lg relative"
-        >
-          <div className="bg-neutral-800 p-16 flex items-center gap-8">
-            <Image
-              src={`/${song.image}`}
-              alt=""
-              width={500}
-              height={500}
-              className="aspect-square object-cover block rounded-md max-w-72"
-            />
-            <div className="flex flex-col gap-8 items-center">
-              <h2 className="text-3xl text-center font-bold">
-                Start listening with a free Spotify account
-              </h2>
-              <Link
-                href='/signup'
-                className="bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 text-black rounded-full font-bold"
-              >
-                Sign up free</Link>
-              <p className="text-neutral-400 text-sm">
-                Already have an account?
-                <Link href='/login' className="text-white font-semibold ml-2 underline hover:text-green-400">
-                  Login
-                </Link>
-              </p>
-            </div>
-          </div>
-          <button className="fixed mt-4 left-1/2 font-semibold text-neutral-400 hover:text-white hover:scale-105">Close</button>
-        </dialog>
+        <UnauthModal
+          dialogRef={dialogRef}
+          isArtistIcon={false}
+          playlistImage={song.image}
+          setIsOpen={setIsOpen}
+        />
       )}
       <div className="flex items-center gap-2 w-full">
         <audio
@@ -136,37 +118,69 @@ export default function SonglistPlayer({
         ></audio>
         {viewAs === 'List' ? (
           <>
-            <Image
-              src={`/${song.image}`}
-              alt=""
-              width={500}
-              height={500}
-              className="aspect-square max-w-10 object-cover block rounded-md"
-            />
-            <div>
-              <p className='hover:underline'>{song.title}</p>
+            <div className='flex-1 flex items-center gap-2'>
+              <Image
+                src={`/${song.image}`}
+                alt=""
+                width={500}
+                height={500}
+                className="aspect-square max-w-10 object-cover block rounded-md"
+              />
+              <div >
+                <p className='hover:underline'>{song.title}</p>
+                {category !== 'Artist' && (
+                  <Link
+                    href={`/artist/${song.artistId}`}
+                    className={`
+                    text-neutral-400 text-sm hover:underline block
+                      ${isHover && 'text-white'} 
+                    `}
+                  >
+                    {song.artist.name}
+                  </Link>
+                )}
+              </div>
+            </div>
+            {category === 'Playlist' && (
+              <Link
+                href={`/album/${song.playlistIds.at(0)}`}
+                className={`
+                hover:underline text-neutral-400 text-sm
+                ${isHover && 'text-white'} mx-auto flex-1
+              `}
+              >
+                {albumName}
+              </Link>
+            )}
+          </>
+        ) : (
+          <>
+            <p className='hover:underline flex-1'>{song.title}</p>
+            {category !== 'Artist' && (
               <Link
                 href={`/artist/${song.artistId}`}
                 className={`
                 text-neutral-400 text-sm hover:underline block
-                ${isHover && 'text-white'}
+                ${isHover && 'text-white'} mx-auto flex-1
               `}
               >
                 {song.artist.name}
               </Link>
-            </div>
+            )}
           </>
-        ) : (
-          <p className='hover:underline'>{song.title}</p>
         )}
-        <div className="ml-auto text-sm">
+        <div
+          className={`text-sm ${(
+            (category !== 'Playlist' && viewAs === 'List') ||
+            (category === 'Artist' && viewAs === 'Compact'))
+            && 'ml-auto'}
+          `}>
           {durations[index] && numToTime(durations[index])}
         </div>
       </div>
       <div className="w-5 text-center">
         {isHover && (
           <SongEllipsis
-            active={active}
             isCreate={isCreate}
             setIsCreate={setIsCreate}
             setIsHover={setIsHover}
@@ -174,8 +188,9 @@ export default function SonglistPlayer({
             songId={song.id}
             artistId={song.artistId}
             artistPage={artistPage}
-            isDeleteOpen={isDeleteOpen}
             setIsDeleteOpen={setIsDeleteOpen}
+            category={category}
+            validUser={validUser}
           />
         )}
       </div>

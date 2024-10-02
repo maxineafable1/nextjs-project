@@ -3,7 +3,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { IoIosAdd } from 'react-icons/io'
 import { BiSolidPlaylist } from "react-icons/bi";
+import { MdLibraryMusic } from "react-icons/md";
 import Link from 'next/link';
+import useModal from '@/hooks/useModal';
+import CreateAlbumModal from './reusables/create-album-modal';
 
 type SidebarButtonProps = {
   action: () => void
@@ -13,17 +16,19 @@ type SidebarButtonProps = {
 export default function SidebarButton({ action, active }: SidebarButtonProps) {
   const [isCreate, setIsCreate] = useState(false)
 
+  const { dialogRef, isOpen, setIsOpen } = useModal()
+
   const divRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
   const plusBtnRef = useRef<HTMLButtonElement>(null)
-  const formRef = useRef<HTMLFormElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (!divRef.current?.contains(e.target as Node)
         && (!btnRef.current?.contains(e.target as Node))
         && (!plusBtnRef.current?.contains(e.target as Node))
-        && (!formRef.current?.contains(e.target as Node))
+        && (!listRef.current?.contains(e.target as Node))
       ) {
         setIsCreate(false)
       }
@@ -33,6 +38,11 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
       document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [isCreate])
+
+  useEffect(() => {
+    if (isOpen)
+      setIsCreate(false)
+  }, [isOpen])
 
   return (
     <>
@@ -47,20 +57,29 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
             <IoIosAdd fontSize='1.75rem' />
           </button>
           {active && (
-            <form
-              ref={formRef}
-              action={action}
-              onSubmit={() => setIsCreate(false)}
+            <div
+              ref={listRef}
               className={`
                 absolute bg-neutral-800 text-white rounded p-1 z-10
-                right-0 shadow text-sm w-44
+                right-0 shadow text-sm w-48
                 ${!isCreate && 'hidden'}
               `}
             >
-              <button className='inline-flex items-center w-full gap-2 hover:bg-neutral-700 p-1'>
-                <BiSolidPlaylist fontSize='1.25rem' />Create a new playlist
+              <form
+                action={action}
+                onSubmit={() => setIsCreate(false)}
+              >
+                <button className='inline-flex items-center w-full gap-2 hover:bg-neutral-700 p-2'>
+                  <BiSolidPlaylist fontSize='1.25rem' />Create a new playlist
+                </button>
+              </form>
+              <button 
+                onClick={() => setIsOpen(true)}
+                className='flex items-center w-full gap-2 hover:bg-neutral-700 p-2'
+              >
+                <MdLibraryMusic fontSize='1.25rem' />Create a new album
               </button>
-            </form>
+            </div>
           )}
         </div>
       </div>
@@ -101,6 +120,13 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
             </div>
           </div>
         </div>
+      )}
+      {isOpen && (
+        <CreateAlbumModal 
+          dialogRef={dialogRef}
+          isOpen={isOpen}
+          setIsOpen={setIsOpen}
+        />
       )}
     </>
   )

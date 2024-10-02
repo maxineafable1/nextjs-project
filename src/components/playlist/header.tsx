@@ -19,6 +19,8 @@ type HeaderProps = {
   totalDuration: number | undefined
   active: boolean
   userId: string | undefined
+  currUserId: string | undefined
+  category: string | undefined
 }
 
 export type PlaylistDetailData = z.infer<typeof PlaylistDetailSchema>
@@ -31,7 +33,8 @@ export default function Header({
   totalDuration,
   active,
   userId,
-
+  currUserId,
+  category,
 }: HeaderProps) {
   const { dialogRef, isOpen, setIsOpen } = useModal()
   const [isEditPhoto, setIsEditPhoto] = useState(false)
@@ -44,14 +47,16 @@ export default function Header({
     return `${String(minutes).padStart(1, '0')} min ${String(seconds).padStart(2, '0')} sec`
   }
 
+  const validUser = active && currUserId === userId
+
   return (
     <div className="flex items-center gap-6">
       <div
         className="w-36 aspect-square block"
-        onMouseEnter={() => active && setIsEditPhoto(true)}
-        onMouseLeave={() => active && setIsEditPhoto(false)}
+        onMouseEnter={() => validUser && setIsEditPhoto(true)}
+        onMouseLeave={() => validUser && setIsEditPhoto(false)}
         onClick={() => {
-          if (active)
+          if (validUser)
             isEditPhoto && setIsOpen(true)
         }}
       >
@@ -99,8 +104,8 @@ export default function Header({
       </div>
       <div>
         <h2
-          className={`text-7xl font-extrabold mb-8 ${active && 'cursor-pointer'}`}
-          onClick={() => active && setIsOpen(true)}
+          className={`text-7xl font-extrabold mb-8 ${validUser && 'cursor-pointer'}`}
+          onClick={() => validUser && setIsOpen(true)}
         >
           {name}</h2>
         <div className="flex items-center gap-2 text-sm">
@@ -126,6 +131,7 @@ export default function Header({
           image={image}
           playlistId={playlistId}
           playlistName={name}
+          category={category}
         />
       )}
     </div>

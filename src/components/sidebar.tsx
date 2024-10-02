@@ -1,5 +1,4 @@
-import { createPlaylist, getPlaylist } from '@/actions/song'
-import { IoIosAdd } from 'react-icons/io'
+import { createPlaylist } from '@/actions/song'
 import PlaylistCard from './playlist/card'
 import { getSession } from '@/actions/auth'
 import prisma from '@/lib/db'
@@ -40,6 +39,10 @@ export default async function Sidebar() {
               albumName={playlist.name}
               playlistImage={playlist.image}
               albumId={playlist.id}
+              category={playlist.category}
+              active={session.active}
+              playlistUserId={playlist.userId}
+              currUserId={session.userId}
             />
           ))}
         </ul>

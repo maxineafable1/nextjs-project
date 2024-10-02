@@ -11,13 +11,15 @@ import { IoIosAddCircleOutline } from "react-icons/io";
 type EllipsisProps = {
   playlistName: string | undefined
   image: string | null | undefined
-  active: boolean
+  category: string | undefined
+  validUser: boolean
 }
 
 export default function Ellipsis({
   playlistName,
   image,
-  active,
+  category,
+  validUser,
 }: EllipsisProps) {
   const [isCreate, setIsCreate] = useState(false)
 
@@ -57,7 +59,7 @@ export default function Ellipsis({
           ${!isCreate && 'hidden'} overflow-hidden text-sm
         `}
       >
-        {active ? (
+        {validUser ? (
           <>
             <button
               onClick={() => setIsOpen(true)}
@@ -74,7 +76,12 @@ export default function Ellipsis({
           </>
         ) : (
           <>
-            
+            <button
+              // onClick={() => setIsEditOpen(true)}
+              className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+            >
+              <MdEdit /> Temporary
+            </button>
           </>
         )}
       </div>
@@ -116,6 +123,7 @@ export default function Ellipsis({
           playlistId={playlistId}
           image={image}
           playlistName={playlistName}
+          category={category}
         />
       )}
     </div>

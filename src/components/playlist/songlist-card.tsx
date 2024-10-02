@@ -11,6 +11,7 @@ import Image from "next/image"
 import Link from "next/link"
 import Ellipsis from "../ellipsis"
 import ListCompact from "./list-compact"
+import UnauthModal from "../reusables/unauth-modal"
 
 type SonglistCardProps = {
   songs: SampleTypeForPlaylist[] | undefined
@@ -18,6 +19,9 @@ type SonglistCardProps = {
   setTotalDuration: React.Dispatch<React.SetStateAction<number | undefined>>
   image: string | null | undefined
   playlistName: string | undefined
+  category: string | undefined
+  currUserId: string
+  playlistUserId: string | undefined
 }
 
 export default function SonglistCard({
@@ -26,7 +30,9 @@ export default function SonglistCard({
   setTotalDuration,
   image,
   playlistName,
-  
+  category,
+  currUserId,
+  playlistUserId,
 }: SonglistCardProps) {
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
   const { dialogRef, isOpen, setIsOpen } = useModal()
@@ -47,6 +53,8 @@ export default function SonglistCard({
     }
 
   }, [songs?.length])
+
+  const validUser = active && currUserId === playlistUserId
 
   return (
     <>
@@ -71,50 +79,32 @@ export default function SonglistCard({
             <Ellipsis
               playlistName={playlistName}
               image={image}
-              active={active}
+              category={category}
+              validUser={validUser}
             />
-            <ListCompact 
+            <ListCompact
               viewAs={viewAs}
               setViewAs={setViewAs}
             />
           </div>
           {isOpen && (
-            <dialog
-              ref={dialogRef}
-              className="text-white max-w-screen-md rounded-lg relative"
-            >
-              <div className="bg-neutral-800 p-16 flex items-center gap-8">
-                <Image
-                  src={image ? `/${image}` : `/${songs?.at(0)?.image}`}
-                  alt=""
-                  width={500}
-                  height={500}
-                  className="aspect-square object-cover block rounded-md max-w-72"
-                />
-                <div className="flex flex-col gap-8 items-center">
-                  <h2 className="text-3xl text-center font-bold">
-                    Start listening with a free Spotify account
-                  </h2>
-                  <Link
-                    href='/signup'
-                    className="bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 text-black rounded-full font-bold"
-                  >
-                    Sign up free</Link>
-                  <p className="text-neutral-400 text-sm">
-                    Already have an account?
-                    <Link href='/login' className="text-white font-semibold ml-2 underline hover:text-green-400">
-                      Login
-                    </Link>
-                  </p>
-                </div>
-              </div>
-              <button className="fixed mt-4 left-1/2 font-semibold text-neutral-400 hover:text-white hover:scale-105">Close</button>
-            </dialog>
+            <UnauthModal
+              dialogRef={dialogRef}
+              firstSongImage={songs?.at(0)?.image}
+              isArtistIcon={false}
+              playlistImage={image}
+              setIsOpen={setIsOpen}
+            />
           )}
           <div className="p-2 px-4 flex items-center gap-4 text-sm text-neutral-400">
             <p className="w-5 text-center">#</p>
-            <p>Title</p>
-            <p className="ml-auto mr-10" title="Duration">
+            <p className="flex-1">Title</p>
+            {category === 'Playlist' ? (
+              <p className="mx-auto flex-1">{viewAs === 'List' ? 'Album' : 'Artist'}</p>
+            ) : (
+              <p className="mx-auto flex-1">{viewAs === 'Compact' && 'Artist'}</p>
+            )}
+            <p className={`mr-10`} title="Duration">
               <IoTimeOutline fontSize='1.125rem' />
             </p>
           </div>
@@ -141,6 +131,9 @@ export default function SonglistCard({
             active={active}
             viewAs={viewAs}
             artistPage={false}
+            albumName={song.playlists?.at(0)?.name}
+            category={category}
+            validUser={validUser}
           />
         ))}
       </ul>

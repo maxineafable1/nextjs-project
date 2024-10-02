@@ -71,7 +71,7 @@ export default function Player() {
   }, [currentTime, duration])
 
   return (
-    <div className="bg-black fixed w-full p-4 bottom-0 h-20 flex items-center gap-8">
+    <div className="bg-black sticky w-full p-4 bottom-0 h-20 flex items-center gap-8">
       {currentSong && (
         <div className="flex items-center gap-3 w-1/4 lg:w-fit">
           <img

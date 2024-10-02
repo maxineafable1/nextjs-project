@@ -48,13 +48,27 @@ export async function getSongs() {
   return songs
 }
 
-export async function searchSong(value: string) {
+export async function searchSong(value: string, category: string) {
   if (!value) return []
+
+  if (category === 'Playlist') {
+    const songs = await prisma.song.findMany({
+      where: {
+        title: {
+          contains: value
+        }
+      }
+    })
+    return songs
+  }
+
+  // only one album per song
   const songs = await prisma.song.findMany({
     where: {
       title: {
         contains: value
-      }
+      },
+      playlists: { none: { category: 'Album' } }
     }
   })
   return songs
@@ -63,12 +77,18 @@ export async function searchSong(value: string) {
 export async function createPlaylist() {
   const session = await getSession()
 
-  const playlistCount = await prisma.playlist.count()
+  const playlistCount = await prisma.playlist.count({
+    where: {
+      userId: session.userId,
+      category: { equals: 'Playlist' }
+    }
+  })
 
   const playlist = await prisma.playlist.create({
     data: {
       name: `My Playlist #${playlistCount < 1 ? 1 : playlistCount + 1}`,
       userId: session.userId,
+      category: 'Playlist'
     }
   })
 
@@ -121,7 +141,19 @@ export async function updatePlaylist(playlistId: string, songId: string) {
     }
   })
 
-  revalidatePath(`/playlist/${playlist.id}`)
+  if (playlist?.category === 'Album') {
+    // TODO: one album only per song
+    await prisma.song.update({
+      where: {
+        id: songId,
+      },
+      data: {
+        playlistIds: { set: [playlist.id] }
+      }
+    })
+  }
+
+  revalidatePath(playlist?.category === 'Album' ? `/album/${playlist.id}` : `/playlist/${playlist.id}`)
 }
 
 export async function updatePlaylistDetails(userId: string, name: string, image?: string) {
@@ -138,16 +170,20 @@ export async function updatePlaylistDetails(userId: string, name: string, image?
 }
 
 export async function deletePlaylist(playlistId: string) {
-  const exists = await prisma.playlist.findFirst({
+  const session = await getSession()
+
+  const exists = await prisma.playlist.findUnique({
     where: {
+      userId: session.userId,
       id: playlistId
     }
   })
 
   if (!exists) return
 
-  const playlist = await prisma.playlist.delete({
+  await prisma.playlist.delete({
     where: {
+      userId: session.userId,
       id: playlistId
     }
   })
@@ -178,6 +214,17 @@ export async function deleteSongFromPlaylist(playlistId: string, songId: string)
     }
   })
 
+  if (playlist.category === 'Album') {
+    await prisma.song.update({
+      where: {
+        id: songId,
+      },
+      data: {
+        playlistIds: { set: [] }
+      }
+    })
+  }
+
   revalidatePath(`/playlist/${playlist.id}`)
 }
 
@@ -194,4 +241,19 @@ export async function deleteSong(songId: string) {
   })
 
   revalidatePath(`/artist/${session.userId}`)
+}
+
+export async function createAlbum(albumName: string, albumImage?: string) {
+  const session = await getSession()
+
+  const album = await prisma.playlist.create({
+    data: {
+      name: albumName,
+      userId: session.userId,
+      image: albumImage,
+      category: 'Album',
+    }
+  })
+
+  redirect(`/album/${album.id}`)
 }

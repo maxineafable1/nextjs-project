@@ -4,6 +4,7 @@ import Link from "next/link"
 import LogoutForm from "./logout-form"
 import { Fragment, useEffect, useRef, useState } from "react"
 import Image from "next/image"
+import { FaUser } from "react-icons/fa"
 
 type ProfileIconProps = {
   name: string
@@ -59,18 +60,25 @@ export default function ProfileIcon({ name, image, userId }: ProfileIconProps) {
           className="rounded-full max-w-10 aspect-square object-cover hover:opacity-80 cursor-pointer"
         />
       ) : (
-        <div
+        // <div
+        //   title={name}
+        //   onClick={() => setIsOpen(true)}
+        //   className="bg-orange-500 rounded-full text-lg font-bold p-1 px-2.5 hover:scale-105 cursor-pointer text-black"
+        // >
+        //   {name[0].toUpperCase()}
+        // </div>
+        <div 
           title={name}
+          className="bg-neutral-700 hover:bg-neutral-600 hover:scale-105 rounded-full p-2"
           onClick={() => setIsOpen(true)}
-          className="bg-orange-500 rounded-full text-lg font-bold p-1 px-2.5 hover:scale-105 cursor-pointer text-black"
         >
-          {name[0].toUpperCase()}
+          <FaUser className="text-neutral-400" />
         </div>
       )}
       <ul
         className={`
           absolute bg-neutral-800 rounded shadow p-2 right-0 z-10
-          ${!isOpen && 'hidden'} w-40
+          ${!isOpen && 'hidden'} w-40 top-10
         `}
       >
         {dropdownList.map((list, i) => (

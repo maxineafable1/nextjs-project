@@ -17,9 +17,11 @@ type PlaylistContainerProps = {
     userId: string
   }) | null
   active: boolean
+  category: string | undefined
+  currUserId: string
 }
 
-export default function PlaylistContainer({ playlistSongs, active }: PlaylistContainerProps) {
+export default function PlaylistContainer({ playlistSongs, active, category, currUserId }: PlaylistContainerProps) {
   const [totalDuration, setTotalDuration] = useState<number | undefined>(undefined)
 
   return (
@@ -32,7 +34,8 @@ export default function PlaylistContainer({ playlistSongs, active }: PlaylistCon
         totalDuration={totalDuration}
         active={active}
         userId={playlistSongs?.userId}
-        
+        currUserId={currUserId}
+        category={category}
       />
       <SonglistCard
         songs={playlistSongs?.songs}
@@ -41,6 +44,9 @@ export default function PlaylistContainer({ playlistSongs, active }: PlaylistCon
         playlistName={playlistSongs?.name}
         // totalDuration={totalDuration}
         setTotalDuration={setTotalDuration}
+        category={category}
+        playlistUserId={playlistSongs?.userId}
+        currUserId={currUserId}
       />
     </>
   )

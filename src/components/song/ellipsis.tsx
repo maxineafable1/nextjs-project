@@ -4,11 +4,8 @@ import { useEffect, useRef } from "react";
 import { FaEllipsis } from "react-icons/fa6";
 import { MdDeleteOutline } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
-import useModal from "@/hooks/useModal";
-import { IoIosAddCircleOutline } from "react-icons/io";
 
 type SongEllipsisProps = {
-  active: boolean
   isCreate: boolean
   setIsCreate: React.Dispatch<React.SetStateAction<boolean>>
   setIsHover: React.Dispatch<React.SetStateAction<boolean>>
@@ -16,12 +13,12 @@ type SongEllipsisProps = {
   songId: string
   artistId: string
   artistPage: boolean
-  isDeleteOpen: boolean
   setIsDeleteOpen: React.Dispatch<React.SetStateAction<boolean>>
+  category: string | undefined
+  validUser: boolean
 }
 
 export default function SongEllipsis({
-  active,
   isCreate,
   setIsCreate,
   setIsHover,
@@ -29,8 +26,9 @@ export default function SongEllipsis({
   songId,
   artistId,
   artistPage,
-  isDeleteOpen,
   setIsDeleteOpen,
+  category,
+  validUser
 }: SongEllipsisProps) {
   const divRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -54,6 +52,7 @@ export default function SongEllipsis({
     }
   }, [isCreate])
 
+
   return (
     <div className="relative">
       <button
@@ -74,13 +73,13 @@ export default function SongEllipsis({
       >
         {!artistPage ? (
           <>
-            {active ? (
+            {validUser ? (
               <>
                 <form action={deleteSongFromPlaylistWithId}>
                   <button
                     className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
                   >
-                    <MdDeleteOutline /> Remove from this playlist
+                    <MdDeleteOutline /> Remove from this {category?.toLowerCase()}
                   </button>
                 </form>
               </>
@@ -97,7 +96,7 @@ export default function SongEllipsis({
           </>
         ) : (
           <>
-            {active ? (
+            {validUser ? (
               <>
                 <button
                   onClick={() => {
@@ -112,7 +111,16 @@ export default function SongEllipsis({
               </>
             ) : (
               <>
-
+                <button
+                  // onClick={() => {
+                  //   setIsDeleteOpen(true)
+                  //   setIsCreate(false)
+                  //   setIsHover(false)
+                  // }}
+                  className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+                >
+                  <MdDeleteOutline /> Temporary
+                </button>
               </>
             )}
 
