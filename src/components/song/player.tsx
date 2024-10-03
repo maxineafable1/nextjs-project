@@ -14,7 +14,7 @@ export default function Player() {
   const [duration, setDuration] = useState(0)
 
   const [isMuted, setIsMuted] = useState(false)
-  const [volume, setVolume] = useState(0.5)
+  const [volume, setVolume] = useState(1)
 
   const audioRef = useRef<HTMLAudioElement>(null)
   const volumeRef = useRef<HTMLInputElement>(null)
@@ -71,20 +71,22 @@ export default function Player() {
   }, [currentTime, duration])
 
   return (
-    <div className="bg-black sticky w-full p-4 bottom-0 h-20 flex items-center gap-8">
-      {currentSong && (
-        <div className="flex items-center gap-3 w-1/4 lg:w-fit">
-          <img
-            src={`/${currentSong?.image}`}
-            alt=""
-            className="block aspect-square object-cover max-w-14 rounded-md"
-          />
-          <div>
-            <p className="font-semibold">{currentSong.title}</p>
-            <p className="text-sm text-neutral-300">{currentSong.artist.name}</p>
-          </div>
-        </div>
-      )}
+    <div className="bg-black sticky w-full p-4 bottom-0 h-20 flex items-center justify-between gap-8">
+      <div className="flex flex-1 max-w-60 items-center gap-3">
+        {currentSong && (
+          <>
+            <img
+              src={`/${currentSong?.image}`}
+              alt=""
+              className="block aspect-square object-cover max-w-14 rounded-md"
+            />
+            <div>
+              <p className="font-semibold">{currentSong.title}</p>
+              <p className="text-sm text-neutral-300">{currentSong.artist.name}</p>
+            </div>
+          </>
+        )}
+      </div>
       {currentSong && (
         <audio
           key={currentSong.song}
@@ -104,7 +106,7 @@ export default function Player() {
           <source src={`/${currentSong.song}`} type="audio/mpeg" />
         </audio>
       )}
-      <div className="flex flex-col gap-2 items-center justify-center mx-auto w-80">
+      <div className="flex flex-1 flex-col gap-2 items-center justify-center max-w-lg">
         <div className="flex items-center gap-4">
           <button
             title="Previous"
@@ -163,7 +165,7 @@ export default function Player() {
           </p>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-1 max-w-xs items-center justify-end gap-2">
         <button
           onClick={() => {
             setIsMuted(prev => !prev)

@@ -6,13 +6,18 @@ import { FaEllipsis } from 'react-icons/fa6'
 import { FiMinusCircle } from 'react-icons/fi'
 import { MdEdit } from 'react-icons/md'
 import EditPlaylistModal from './reusables/edit-playlist-modal'
-import { IoIosAddCircleOutline } from "react-icons/io";
+import Link from 'next/link'
+import { FiUpload } from "react-icons/fi";
+import EditArtistModal from './reusables/edit-artist-modal'
+import DeleteModal from './reusables/delete-modal'
 
 type EllipsisProps = {
-  playlistName: string | undefined
+  playlistName: string | null | undefined
   image: string | null | undefined
   category: string | undefined
   validUser: boolean
+  urlId?: string
+  artistName: string | null | undefined
 }
 
 export default function Ellipsis({
@@ -20,6 +25,8 @@ export default function Ellipsis({
   image,
   category,
   validUser,
+  urlId,
+  artistName,
 }: EllipsisProps) {
   const [isCreate, setIsCreate] = useState(false)
 
@@ -61,12 +68,23 @@ export default function Ellipsis({
       >
         {validUser ? (
           <>
-            <button
-              onClick={() => setIsOpen(true)}
-              className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
-            >
-              <FiMinusCircle /> Delete
-            </button>
+            {category !== 'Artist' ? (
+              <>
+                <button
+                  onClick={() => setIsOpen(true)}
+                  className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+                >
+                  <FiMinusCircle /> Delete
+                </button>
+              </>
+            ) : (
+              <Link
+                href='/songs/upload'
+                className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+              >
+                <FiUpload /> Upload
+              </Link>
+            )}
             <button
               onClick={() => setIsEditOpen(true)}
               className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
@@ -86,45 +104,38 @@ export default function Ellipsis({
         )}
       </div>
       {isOpen && (
-        <dialog
-          ref={dialogRef}
-          className='bg-white p-6 rounded-lg overflow-hidden w-full max-w-md'
-        >
-          <div className='flex flex-col gap-2 w-full'>
-            <h2 className='font-bold text-2xl'>Delete from Your Library?</h2>
-            <p className='text-sm'>This will delete <span className='font-bold'>{playlistName}</span> from Your Library.</p>
-            <div className='flex items-center mt-4 gap-6 self-end'>
-              <button
-                onClick={() => {
-                  setIsOpen(false)
-                  dialogRef.current?.close()
-                }}
-                className='font-bold hover:scale-105'
-              >
-                Cancel
-              </button>
-              <form action={deletePlaylistWithId}>
-                <button
-                  className='bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 rounded-full font-bold'
-                  type='submit'
-                >
-                  Delete
-                </button>
-              </form>
-            </div>
-          </div>
-        </dialog>
+        <DeleteModal
+          deleteDialogRef={dialogRef}
+          nameToDelete={playlistName}
+          setIsDeleteOpen={setIsOpen}
+          action={deletePlaylistWithId}
+        />
       )}
       {isEditOpen && (
-        <EditPlaylistModal
-          dialogRef={editDialogRef}
-          isOpen={isEditOpen}
-          setIsOpen={setIsEditOpen}
-          playlistId={playlistId}
-          image={image}
-          playlistName={playlistName}
-          category={category}
-        />
+        <>
+          {category === 'Artist' ? (
+            <EditArtistModal
+              dialogRef={editDialogRef}
+              image={image}
+              isOpen={isOpen}
+              setIsOpen={setIsOpen}
+              urlId={urlId!}
+              validUser={validUser}
+              name={artistName}
+            />
+          ) : (
+            <EditPlaylistModal
+              dialogRef={editDialogRef}
+              isOpen={isEditOpen}
+              setIsOpen={setIsEditOpen}
+              playlistId={playlistId}
+              image={image}
+              playlistName={playlistName}
+              category={category}
+            />
+          )}
+        </>
+
       )}
     </div>
   )

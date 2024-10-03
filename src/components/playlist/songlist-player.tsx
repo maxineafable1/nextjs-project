@@ -8,6 +8,7 @@ import SongEllipsis from '../song/ellipsis'
 import { useParams } from 'next/navigation'
 import { deleteSong } from '@/actions/song'
 import UnauthModal from '../reusables/unauth-modal'
+import DeleteModal from '../reusables/delete-modal'
 // import HoverPlayButton from '../hover-play-btn'
 
 type SonglistPlayerProps = {
@@ -195,40 +196,12 @@ export default function SonglistPlayer({
         )}
       </div>
       {isDeleteOpen && (
-        <dialog
-          ref={deleteDialogRef}
-          className='bg-white p-6 rounded-lg overflow-hidden w-full max-w-md'
-        >
-          <div className='flex flex-col gap-2 w-full'>
-            <h2 className='font-bold text-2xl self-start'>Delete this track?</h2>
-            <p className='text-sm self-start'>
-              This will delete
-              <span className='font-bold mx-1'>
-                {song.title}
-              </span>
-              from your songs.
-            </p>
-            <div className='flex items-center mt-4 gap-6 self-end'>
-              <button
-                onClick={() => {
-                  deleteDialogRef.current?.close()
-                  setIsDeleteOpen(false)
-                }}
-                className='font-bold hover:scale-105'
-              >
-                Cancel
-              </button>
-              <form action={deleteSongWithId}>
-                <button
-                  className='bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 rounded-full font-bold'
-                  type='submit'
-                >
-                  Delete
-                </button>
-              </form>
-            </div>
-          </div>
-        </dialog>
+        <DeleteModal 
+          deleteDialogRef={deleteDialogRef}
+          nameToDelete={song.title}
+          setIsDeleteOpen={setIsDeleteOpen}
+          action={deleteSongWithId}
+        />
       )}
     </li>
   )

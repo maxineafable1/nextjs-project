@@ -16,6 +16,9 @@ type SearchSongsType = {
   genre: string;
   artistId: string;
   playlistIds: string[];
+  artist: {
+    name: string | null
+  }
 }[]
 
 type SearchFormProps = {
@@ -27,11 +30,11 @@ type SearchFormProps = {
   category: string
 }
 
-export default function SearchForm({ 
-  setPlaylistSong, 
-  handleSubmit, 
-  onSubmit, 
-  register, 
+export default function SearchForm({
+  setPlaylistSong,
+  handleSubmit,
+  onSubmit,
+  register,
   setIsFindMore,
   category,
 }: SearchFormProps) {
@@ -90,7 +93,7 @@ export default function SearchForm({
             />
             <div>
               <p>{song.title}</p>
-              <p className="text-neutral-400 text-sm">Artist name</p>
+              <p className="text-neutral-400 text-sm">{song.artist.name}</p>
             </div>
             <form className="ml-auto" onSubmit={handleSubmit(onSubmit)}>
               <button

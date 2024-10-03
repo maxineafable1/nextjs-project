@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from "react";
 import SonglistPlayer from "../playlist/songlist-player";
 import ListCompact from "../playlist/list-compact";
 import UnauthModal from "../reusables/unauth-modal";
+import Ellipsis from "../ellipsis";
 
 type ArtistSongCardProps = {
   songs: SampleTypeForPlaylist[] | undefined
@@ -17,6 +18,7 @@ type ArtistSongCardProps = {
   image: string | null | undefined
   urlId: string
   currUserId: string
+  name: string | null | undefined
 }
 
 export default function ArtistSongCard({
@@ -25,6 +27,7 @@ export default function ArtistSongCard({
   image,
   urlId,
   currUserId,
+  name,
 }: ArtistSongCardProps) {
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
   const { dialogRef, isOpen, setIsOpen } = useModal()
@@ -52,7 +55,7 @@ export default function ArtistSongCard({
     <>
       {songs?.length !== 0 && (
         <>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 my-4">
             <button
               onClick={e => {
                 if (!songs) return
@@ -64,18 +67,18 @@ export default function ArtistSongCard({
                   setIsOpen(true)
                 }
               }}
-              className="bg-green-500 p-4 my-4 rounded-full hover:scale-110 hover:bg-green-400"
+              className="bg-green-500 p-4 rounded-full hover:scale-110 hover:bg-green-400"
             >
               <FaPlay fill="black" />
             </button>
-            {validUser && (
-              <Link
-                href='/songs/upload'
-                className="font-semibold text-sm px-3 py-1 hover:scale-105 hover:border-white border border-neutral-500 rounded-full"
-              >
-                Upload
-              </Link>
-            )}
+            <Ellipsis
+              playlistName={name}
+              image={image}
+              category={'Artist'}
+              validUser={validUser}
+              artistName={name}
+              urlId={urlId}
+            />
             <ListCompact
               viewAs={viewAs}
               setViewAs={setViewAs}
@@ -90,7 +93,7 @@ export default function ArtistSongCard({
               setIsOpen={setIsOpen}
             />
           )}
-          <h2 className="text-2xl font-bold mb-4">Songs</h2>
+          <h2 className="text-2xl font-bold mt-8 mb-4">Songs</h2>
           <ul>
             {songs?.map((song, index) => (
               <SonglistPlayer

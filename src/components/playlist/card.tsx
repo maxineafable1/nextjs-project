@@ -12,6 +12,7 @@ import { MdEdit } from 'react-icons/md';
 import useModal from '@/hooks/useModal';
 import { deletePlaylist } from '@/actions/song';
 import EditPlaylistModal from '../reusables/edit-playlist-modal';
+import DeleteModal from '../reusables/delete-modal';
 
 type PlaylistCardProps = {
   songs: SampleTypeForPlaylist[]
@@ -162,34 +163,12 @@ export default function PlaylistCard({
         </button>
       </div>
       {isOpen && (
-        <dialog
-          ref={dialogRef}
-          className='bg-white p-6 rounded-lg overflow-hidden w-full max-w-md'
-        >
-          <div className='flex flex-col gap-2 w-full'>
-            <h2 className='font-bold text-2xl'>Delete from Your Library?</h2>
-            <p className='text-sm'>This will delete <span className='font-bold'>{albumName}</span> from Your Library.</p>
-            <div className='flex items-center mt-4 gap-6 self-end'>
-              <button
-                onClick={() => {
-                  setIsOpen(false)
-                  dialogRef.current?.close()
-                }}
-                className='font-bold hover:scale-105'
-              >
-                Cancel
-              </button>
-              <form action={deletePlaylistWithId}>
-                <button
-                  className='bg-green-500 hover:bg-green-400 hover:scale-105 px-6 py-3 rounded-full font-bold'
-                  type='submit'
-                >
-                  Delete
-                </button>
-              </form>
-            </div>
-          </div>
-        </dialog>
+        <DeleteModal
+          deleteDialogRef={dialogRef}
+          nameToDelete={albumName}
+          setIsDeleteOpen={setIsOpen}
+          action={deletePlaylistWithId}
+          />
       )}
       {isEditOpen && (
         <EditPlaylistModal

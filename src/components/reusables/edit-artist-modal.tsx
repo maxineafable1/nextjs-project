@@ -1,46 +1,47 @@
-import { SubmitHandler, useForm } from "react-hook-form"
-import { PlaylistDetailData } from "../playlist/header"
-import { PlaylistDetailSchema } from "@/lib/definitions"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { updatePlaylistDetails } from "@/actions/song"
-import { RefObject, SetStateAction, useState } from "react"
-import { IoClose } from "react-icons/io5"
-import Image from "next/image"
-import { MdEdit } from "react-icons/md"
-import { FaMusic } from "react-icons/fa"
+import React, { useState } from 'react'
+import { SubmitHandler, useForm } from 'react-hook-form'
+import { ArtistInfoData } from '../artist/header'
+import { ArtistInfoSchema } from '@/lib/definitions'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { updateUserInfo } from '@/actions/auth'
+import Image from 'next/image'
+import { IoClose } from 'react-icons/io5'
+import { MdEdit } from 'react-icons/md'
+import { FaUser } from 'react-icons/fa'
 
-type EditPlaylistModalProps = {
-  dialogRef: RefObject<HTMLDialogElement>
+type EditArtistModalProps = {
+  dialogRef: React.RefObject<HTMLDialogElement>
   isOpen: boolean
-  setIsOpen: React.Dispatch<SetStateAction<boolean>>
-  image: string | undefined | null
-  playlistName: string | null | undefined
-  playlistId: string | string[]
-  category: string | undefined
-}
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
+  urlId: string
+  validUser: boolean
+  image: string | null | undefined
+  name: string | null | undefined
+} 
 
-export default function EditPlaylistModal({
+export default function EditArtistModal({
   dialogRef,
   isOpen,
   setIsOpen,
+  urlId,
+  validUser,
   image,
-  playlistName,
-  playlistId,
-  category,
-}: EditPlaylistModalProps) {
+  name,
+}: EditArtistModalProps) {
   const [isEditPhoto, setIsEditPhoto] = useState(false)
   const [photoValue, setPhotoValue] = useState<File | null>(null)
 
-  const { register, formState: { errors }, handleSubmit } = useForm<PlaylistDetailData>({
+  const { register, formState: { errors }, handleSubmit } = useForm<ArtistInfoData>({
     mode: 'all',
-    resolver: zodResolver(PlaylistDetailSchema)
+    resolver: zodResolver(ArtistInfoSchema)
   })
 
   const { onChange, name: registerName, ref } = register('image')
 
-  const onSubmit: SubmitHandler<PlaylistDetailData> = async (data) => {
+  const onSubmit: SubmitHandler<ArtistInfoData> = async (data) => {
     try {
-      const updatePlaylistDetailsWithId = updatePlaylistDetails.bind(null, playlistId as string)
+      console.log(data)
+      const updateUserInfoWithId = updateUserInfo.bind(null, urlId as string)
       if (data.image[0]) {
         const formData = new FormData()
         formData.append('image', data.image[0])
@@ -53,13 +54,14 @@ export default function EditPlaylistModal({
 
         const { imgFileName } = await res.json()
 
-        const updateRes = await updatePlaylistDetailsWithId(data.name, imgFileName)
+        const updateRes = await updateUserInfoWithId(data.name, imgFileName)
         console.log(updateRes)
       } else {
-        const updateRes = await updatePlaylistDetailsWithId(data.name)
+        const updateRes = await updateUserInfoWithId(data.name)
         console.log(updateRes)
       }
-      setIsOpen(false)
+      if (isOpen)
+        setIsOpen(false)
     } catch (error) {
       console.log(error)
     }
@@ -75,6 +77,7 @@ export default function EditPlaylistModal({
           <h2 className="text-xl font-semibold">Edit details</h2>
           <button
             onClick={() => {
+              console.log('close click')
               dialogRef.current?.close()
               setIsOpen(false)
             }}
@@ -84,16 +87,14 @@ export default function EditPlaylistModal({
         </div>
         {(errors.name?.message || errors.image?.message) && (
           <p className="bg-red-400 text-sm rounded px-2 py-1 mb-2">
-            {/* {errors.name?.message || errors.image?.message?.toString()} */}
-            {errors.name?.message?.toString() || errors.image?.message?.toString()}
+            {errors.name?.message || errors.image?.message?.toString()}
           </p>
         )}
         <form
           className="flex gap-4"
-          onSubmit={handleSubmit(onSubmit)}
-          onKeyDown={e => {
-            // ayaw mag submit pag enter e, kaya ito muna
-            if (e.key.toLowerCase() === 'enter')
+          onSubmit={e => {
+            e.preventDefault()
+            if (validUser)
               handleSubmit(onSubmit)()
           }}
         >
@@ -113,7 +114,7 @@ export default function EditPlaylistModal({
                       width={500}
                       height={500}
                       className={`
-                        aspect-square object-cover block rounded-md
+                        aspect-square object-cover block rounded-full
                         ${isEditPhoto && 'opacity-30'}
                       `}
                     />
@@ -128,7 +129,7 @@ export default function EditPlaylistModal({
                     alt=""
                     width={500}
                     height={500}
-                    className={`aspect-square object-cover block rounded-md`}
+                    className={`aspect-square object-cover block rounded-full`}
                   />
                 )}
               </div>
@@ -144,7 +145,7 @@ export default function EditPlaylistModal({
                           width={500}
                           height={500}
                           className={`
-                              aspect-square object-cover block rounded-md
+                              aspect-square object-cover block rounded-full
                               ${isEditPhoto && 'opacity-30'}
                             `}
                         />
@@ -159,19 +160,19 @@ export default function EditPlaylistModal({
                         alt=""
                         width={500}
                         height={500}
-                        className={`aspect-square object-cover block rounded-md`}
+                        className={`aspect-square object-cover block rounded-full`}
                       />
                     )}
                   </div>
                 ) : (
-                  <div className="p-6 bg-neutral-700 rounded h-full text-6xl flex flex-col gap-1 items-center justify-center">
+                  <div className="p-6 bg-neutral-700 rounded-full h-full text-6xl flex flex-col gap-1 items-center justify-center">
                     {isEditPhoto ? (
                       <>
                         <MdEdit />
                         <p className="text-sm">Choose photo</p>
                       </>
                     ) : (
-                      <FaMusic className="text-neutral-400" />
+                      <FaUser className="text-neutral-400" />
                     )}
                   </div>
                 )}
@@ -194,20 +195,20 @@ export default function EditPlaylistModal({
           />
           <div className="flex flex-col justify-between gap-1">
             <div className="grid gap-1">
-              <label htmlFor="name" className="font-semibold text-sm">{category} Name</label>
+              <label htmlFor="name" className="font-semibold text-sm">Artist Name</label>
               <input
                 type="text"
                 id="name"
-                defaultValue={playlistName!}
+                defaultValue={name!}
                 {...register('name')}
                 className="px-3 py-2 rounded bg-neutral-700"
               />
             </div>
             <button
               className="self-end rounded-full bg-white text-black px-6 py-3 font-semibold"
+              type="submit"
             >
-              Save
-            </button>
+              Save</button>
           </div>
         </form>
       </div>

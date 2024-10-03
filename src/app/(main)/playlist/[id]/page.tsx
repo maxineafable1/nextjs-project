@@ -32,7 +32,6 @@ export default async function page({ params: { id } }: { params: { id: string }}
       }
     }
   })
-  // console.log(playlistSongs)
 
   return (
     <div>
@@ -43,7 +42,9 @@ export default async function page({ params: { id } }: { params: { id: string }}
         currUserId={session.userId}
       />
       {(session.active && playlistSongs?.userId === session.userId) && (
-        <PlaylistForm category={playlistSongs.category} />
+        <PlaylistForm 
+          category={playlistSongs.category}
+        />
       )}
     </div>
   )

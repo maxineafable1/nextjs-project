@@ -33,15 +33,14 @@ export default async function page({ params: { id } }: { params: { id: string }}
       }
     }
   })
-
-  console.log(albumSongs)
-
+  
   return (
     <div>
       <PlaylistContainer
         playlistSongs={albumSongs}
         active={session.active}
         category={albumSongs?.category}
+        currUserId={session.userId}
       />
       {(session.active && albumSongs?.userId === session.userId) && (
         <PlaylistForm category={albumSongs.category} />

@@ -57,18 +57,34 @@ export async function searchSong(value: string, category: string) {
         title: {
           contains: value
         }
+      },
+      include: {
+        artist: {
+          select: {
+            name: true
+          }
+        }
       }
     })
     return songs
   }
 
   // only one album per song
+  const session = await getSession()
   const songs = await prisma.song.findMany({
     where: {
+      artistId: session.userId,
       title: {
         contains: value
       },
       playlists: { none: { category: 'Album' } }
+    },
+    include: {
+      artist: {
+        select: {
+          name: true
+        }
+      }
     }
   })
   return songs
