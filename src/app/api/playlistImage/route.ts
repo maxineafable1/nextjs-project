@@ -1,25 +1,22 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
-import fs from "node:fs/promises";
-import { join } from "node:path";
+import { uploadFileS3 } from "../s3-upload/route";
 
 export async function POST(req: Request) {
   try {
     const formData = await req.formData()
 
-    const imageFile = formData.get("image") as File
+    const imageFile = formData.get('image') as File
+
+    if (!imageFile)
+      return NextResponse.json({ error: 'Image is required' }, { status: 400 })
 
     const imgArrayBuffer = await imageFile.arrayBuffer()
     const imgBuffer = new Uint8Array(imgArrayBuffer)
 
-    const imgFileName = `${Date.now()}${imageFile.name}`
-    const imgPath = join(process.cwd(), 'public', imgFileName)
+    const imgFileName = await uploadFileS3(imgBuffer, imageFile.name, imageFile.type)
 
-    await fs.writeFile(imgPath, imgBuffer)
-
-    // revalidatePath('/playlist')
     return NextResponse.json({ imgFileName })
-  } catch (e) {
-    return NextResponse.json({ status: "fail", error: e })
+  } catch (error) {
+    return NextResponse.json({ error })
   }
 }

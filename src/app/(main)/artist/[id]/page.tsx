@@ -63,23 +63,25 @@ export default async function page({ params: { id } }: { params: { id: string } 
         currUserId={session.userId}
         name={artistSongs?.name}
       />
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold mb-4">Albums</h2>
-        <ul className="grid xl:grid-cols-4 lg:grid-cols-3 grid-cols-2 mb-4">
-          {artistAlbums.map(album => (
-            <CardGenre
-              key={album.id}
-              songs={album.songs}
-              active={session.active}
-              name={album.name}
-              playlistImage={album.image}
-              isArtistIcon={false}
-              roundedCard={false}
-              href={`/${album.category.toLowerCase()}/${album.id}`}
-            />
-          ))}
-        </ul>
-      </div>
+      {artistAlbums.length > 0 && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-bold mb-4">Albums</h2>
+          <ul className="grid xl:grid-cols-4 lg:grid-cols-3 grid-cols-2 mb-4">
+            {artistAlbums.map(album => (
+              <CardGenre
+                key={album.id}
+                songs={album.songs}
+                active={session.active}
+                name={album.name}
+                playlistImage={album.image}
+                isArtistIcon={false}
+                roundedCard={false}
+                href={`/${album.category.toLowerCase()}/${album.id}`}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

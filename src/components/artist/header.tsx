@@ -47,7 +47,7 @@ export default function ArtistHeader({
             {isEditPhoto ? (
               <>
                 <Image
-                  src={`/${image}`}
+                  src={`${process.env.BASE_URL}/${image}`}
                   alt=""
                   width={500}
                   height={500}
@@ -63,7 +63,7 @@ export default function ArtistHeader({
               </>
             ) : (
               <Image
-                src={`/${image}`}
+                src={`${process.env.BASE_URL}/${image}`}
                 alt=""
                 width={500}
                 height={500}
@@ -96,7 +96,6 @@ export default function ArtistHeader({
         <EditArtistModal
           dialogRef={dialogRef}
           image={image}
-          isOpen={isOpen}
           setIsOpen={setIsOpen}
           urlId={urlId}
           validUser={validUser}

@@ -106,7 +106,7 @@ export default function SonglistPlayer({
           ref={ref => {
             audioRef.current[index] = ref
           }}
-          src={`/${song.song}`}
+          src={`${process.env.SONG_URL}/${song.song}`}
           preload="metadata"
           onLoadedMetadata={() => {
             // dont remove this so durations are updated
@@ -121,7 +121,7 @@ export default function SonglistPlayer({
           <>
             <div className='flex-1 flex items-center gap-2'>
               <Image
-                src={`/${song.image}`}
+                src={`${process.env.BASE_URL}/${song.image}`}
                 alt=""
                 width={500}
                 height={500}
@@ -196,11 +196,12 @@ export default function SonglistPlayer({
         )}
       </div>
       {isDeleteOpen && (
-        <DeleteModal 
+        <DeleteModal
           deleteDialogRef={deleteDialogRef}
           nameToDelete={song.title}
           setIsDeleteOpen={setIsDeleteOpen}
           action={deleteSongWithId}
+          category={category}
         />
       )}
     </li>

@@ -85,7 +85,7 @@ export default function SearchForm({
             className="flex items-center gap-2 hover:bg-neutral-800 p-2 rounded"
           >
             <Image
-              src={`/${song.image}`}
+              src={`${process.env.BASE_URL}/${song.image}`}
               alt=""
               width={500}
               height={500}

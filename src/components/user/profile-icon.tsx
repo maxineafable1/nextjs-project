@@ -51,7 +51,7 @@ export default function ProfileIcon({ name, image, userId }: ProfileIconProps) {
     >
       {image ? (
         <Image
-          src={`/${image}`}
+          src={`${process.env.BASE_URL}/${image}`}
           alt=""
           height={500}
           width={500}

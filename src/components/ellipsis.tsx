@@ -17,7 +17,7 @@ type EllipsisProps = {
   category: string | undefined
   validUser: boolean
   urlId?: string
-  artistName: string | null | undefined
+  artistName?: string | null
 }
 
 export default function Ellipsis({
@@ -109,6 +109,8 @@ export default function Ellipsis({
           nameToDelete={playlistName}
           setIsDeleteOpen={setIsOpen}
           action={deletePlaylistWithId}
+          category={category}
+          // onSubmit={onSubmit}
         />
       )}
       {isEditOpen && (
@@ -117,7 +119,6 @@ export default function Ellipsis({
             <EditArtistModal
               dialogRef={editDialogRef}
               image={image}
-              isOpen={isOpen}
               setIsOpen={setIsOpen}
               urlId={urlId!}
               validUser={validUser}
@@ -126,7 +127,6 @@ export default function Ellipsis({
           ) : (
             <EditPlaylistModal
               dialogRef={editDialogRef}
-              isOpen={isEditOpen}
               setIsOpen={setIsEditOpen}
               playlistId={playlistId}
               image={image}

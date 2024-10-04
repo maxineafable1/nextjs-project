@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { CiVolumeHigh, CiVolumeMute } from "react-icons/ci";
 import { IoPlaySkipForward, IoPlaySkipBackSharp } from "react-icons/io5";
+import Link from "next/link";
 
 export default function Player() {
   const { currentSong, setCurrentSong, currentAlbum } = useSongContext()
@@ -70,19 +71,31 @@ export default function Player() {
     }
   }, [currentTime, duration])
 
+  useEffect(() => {
+    // autoplay music
+    if (currentSong?.song) {
+      audioRef.current?.play()
+      setPlaying(true)
+    }
+  }, [currentSong?.song])
+
   return (
     <div className="bg-black sticky w-full p-4 bottom-0 h-20 flex items-center justify-between gap-8">
       <div className="flex flex-1 max-w-60 items-center gap-3">
         {currentSong && (
           <>
             <img
-              src={`/${currentSong?.image}`}
+              src={`${process.env.BASE_URL}/${currentSong?.image}`}
               alt=""
               className="block aspect-square object-cover max-w-14 rounded-md"
             />
             <div>
               <p className="font-semibold">{currentSong.title}</p>
-              <p className="text-sm text-neutral-300">{currentSong.artist.name}</p>
+              <Link
+                href={`/artist/${currentSong.artistId}`}
+                className="text-sm text-neutral-300 hover:underline hover:text-white"
+              >
+                {currentSong.artist.name}</Link>
             </div>
           </>
         )}
@@ -103,7 +116,7 @@ export default function Player() {
               setCurrentSong(currentAlbum[currentIndex + 1])
           }}
         >
-          <source src={`/${currentSong.song}`} type="audio/mpeg" />
+          <source src={`${process.env.SONG_URL}/${currentSong.song}`} type="audio/mpeg" />
         </audio>
       )}
       <div className="flex flex-1 flex-col gap-2 items-center justify-center max-w-lg">

@@ -11,17 +11,15 @@ import { FaUser } from 'react-icons/fa'
 
 type EditArtistModalProps = {
   dialogRef: React.RefObject<HTMLDialogElement>
-  isOpen: boolean
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
   urlId: string
   validUser: boolean
   image: string | null | undefined
   name: string | null | undefined
-} 
+}
 
 export default function EditArtistModal({
   dialogRef,
-  isOpen,
   setIsOpen,
   urlId,
   validUser,
@@ -60,8 +58,8 @@ export default function EditArtistModal({
         const updateRes = await updateUserInfoWithId(data.name)
         console.log(updateRes)
       }
-      if (isOpen)
-        setIsOpen(false)
+
+      setIsOpen(false)  
     } catch (error) {
       console.log(error)
     }
@@ -95,6 +93,11 @@ export default function EditArtistModal({
           onSubmit={e => {
             e.preventDefault()
             if (validUser)
+              handleSubmit(onSubmit)()
+          }}
+          onKeyDown={e => {
+            // ayaw mag submit pag enter e, kaya ito muna
+            if (e.key.toLowerCase() === 'enter')
               handleSubmit(onSubmit)()
           }}
         >
@@ -140,7 +143,7 @@ export default function EditArtistModal({
                     {isEditPhoto ? (
                       <>
                         <Image
-                          src={`/${image}`}
+                          src={`${process.env.BASE_URL}/${image}`}
                           alt=""
                           width={500}
                           height={500}
@@ -156,7 +159,7 @@ export default function EditArtistModal({
                       </>
                     ) : (
                       <Image
-                        src={`/${image}`}
+                        src={`${process.env.BASE_URL}/${image}`}
                         alt=""
                         width={500}
                         height={500}

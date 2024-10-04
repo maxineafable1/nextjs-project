@@ -11,7 +11,7 @@ import { FaMusic } from "react-icons/fa"
 
 type EditPlaylistModalProps = {
   dialogRef: RefObject<HTMLDialogElement>
-  isOpen: boolean
+  // isOpen: boolean
   setIsOpen: React.Dispatch<SetStateAction<boolean>>
   image: string | undefined | null
   playlistName: string | null | undefined
@@ -21,7 +21,6 @@ type EditPlaylistModalProps = {
 
 export default function EditPlaylistModal({
   dialogRef,
-  isOpen,
   setIsOpen,
   image,
   playlistName,
@@ -139,7 +138,7 @@ export default function EditPlaylistModal({
                     {isEditPhoto ? (
                       <>
                         <Image
-                          src={`/${image}`}
+                          src={`${process.env.BASE_URL}/${image}`}
                           alt=""
                           width={500}
                           height={500}
@@ -155,7 +154,7 @@ export default function EditPlaylistModal({
                       </>
                     ) : (
                       <Image
-                        src={`/${image}`}
+                        src={`${process.env.BASE_URL}/${image}`}
                         alt=""
                         width={500}
                         height={500}

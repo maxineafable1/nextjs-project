@@ -5,6 +5,8 @@ import prisma from "@/lib/db";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { PlaylistFormData } from "@/components/playlist/playlist-form";
+import { s3Client } from "@/app/api/s3-upload/route";
+import { DeleteObjectCommand, waitUntilObjectNotExists } from "@aws-sdk/client-s3";
 
 export type NewDataType = {
   title: string
@@ -172,10 +174,30 @@ export async function updatePlaylist(playlistId: string, songId: string) {
   revalidatePath(playlist?.category === 'Album' ? `/album/${playlist.id}` : `/playlist/${playlist.id}`)
 }
 
-export async function updatePlaylistDetails(userId: string, name: string, image?: string) {
+export async function updatePlaylistDetails(playlistId: string, name: string, image?: string) {
+  const session = await getSession()
+
+  const exists = await prisma.playlist.findUnique({
+    where: {
+      userId: session.userId,
+      id: playlistId
+    }
+  })
+
+  if (!exists) return
+
+  if (image) {
+    await s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: `images/${exists.image}`,
+      })
+    )
+  }
+
   const playlist = await prisma.playlist.update({
     where: {
-      id: userId,
+      id: playlistId,
     },
     data: {
       name,
@@ -196,6 +218,13 @@ export async function deletePlaylist(playlistId: string) {
   })
 
   if (!exists) return
+
+  await s3Client.send(
+    new DeleteObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `images/${exists.image}`,
+    })
+  )
 
   await prisma.playlist.delete({
     where: {
@@ -247,11 +276,29 @@ export async function deleteSongFromPlaylist(playlistId: string, songId: string)
 export async function deleteSong(songId: string) {
   const session = await getSession()
 
+  const exists = await prisma.song.findUnique({
+    where: { id: songId, artistId: session.userId }
+  })
+
+  if (!exists) return
+
+  await s3Client.send(
+    new DeleteObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `images/${exists.image}`,
+    })
+  )
+
+  await s3Client.send(
+    new DeleteObjectCommand({
+      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Key: `songs/${exists.song}`,
+    })
+  )
+
   await prisma.song.delete({
     where: {
-      artist: {
-        id: session.userId
-      },
+      artistId: session.userId,
       id: songId
     }
   })

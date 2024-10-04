@@ -95,7 +95,7 @@ export default function PlaylistCard({
               {isHover ? (
                 <>
                   <Image
-                    src={`/${playlistImage}`}
+                    src={`${process.env.BASE_URL}/${playlistImage}`}
                     alt=""
                     width={500}
                     height={500}
@@ -107,7 +107,7 @@ export default function PlaylistCard({
                 </>
               ) : (
                 <Image
-                  src={`/${playlistImage}`}
+                  src={`${process.env.BASE_URL}/${playlistImage}`}
                   alt=""
                   width={500}
                   height={500}
@@ -168,12 +168,12 @@ export default function PlaylistCard({
           nameToDelete={albumName}
           setIsDeleteOpen={setIsOpen}
           action={deletePlaylistWithId}
-          />
+          category={category}
+        />
       )}
       {isEditOpen && (
         <EditPlaylistModal
           dialogRef={editDialogRef}
-          isOpen={isEditOpen}
           setIsOpen={setIsEditOpen}
           playlistId={albumId}
           image={playlistImage}

@@ -80,7 +80,7 @@ export default function CardGenre({
       <Link href={href}>
         {playlistImage ? (
           <Image
-            src={`/${playlistImage}`}
+            src={`${process.env.BASE_URL}/${playlistImage}`}
             alt=""
             width={500}
             height={500}

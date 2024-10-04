@@ -65,7 +65,7 @@ export default function Header({
             {isEditPhoto ? (
               <>
                 <Image
-                  src={`/${image}`}
+                  src={`${process.env.BASE_URL}/${image}`}
                   alt=""
                   width={500}
                   height={500}
@@ -81,7 +81,7 @@ export default function Header({
               </>
             ) : (
               <Image
-                src={`/${image}`}
+                src={`${process.env.BASE_URL}/${image}`}
                 alt=""
                 width={500}
                 height={500}
@@ -126,7 +126,6 @@ export default function Header({
       {isOpen && (
         <EditPlaylistModal
           dialogRef={dialogRef}
-          isOpen={isOpen}
           setIsOpen={setIsOpen}
           image={image}
           playlistId={playlistId}

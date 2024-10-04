@@ -58,7 +58,7 @@ export default function UploadForm() {
       formData.append('song', data.song[0])
 
       // save files to public folder
-      const res = await fetch('/api/uploadImage', {
+      const res = await fetch('/api/s3-upload', {
         method: 'POST',
         body: formData
       })

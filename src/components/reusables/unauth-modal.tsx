@@ -26,7 +26,7 @@ export default function UnauthModal({
       <div className="p-16 flex items-center gap-8">
         {playlistImage ? (
           <Image
-            src={playlistImage ? `/${playlistImage}` : `/${firstSongImage}`}
+            src={playlistImage ? `${process.env.BASE_URL}/${playlistImage}` : `${process.env.BASE_URL}/${firstSongImage}`}
             alt=""
             width={500}
             height={500}

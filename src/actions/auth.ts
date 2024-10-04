@@ -9,6 +9,8 @@ import { redirect } from "next/navigation"
 import { SignupFormData } from "@/components/user/signup-form"
 import { LoginFormData } from "@/components/user/login-form"
 import { revalidatePath } from "next/cache"
+import { s3Client } from "@/app/api/s3-upload/route"
+import { DeleteObjectCommand } from "@aws-sdk/client-s3"
 // import { FormData1 } from "@/components/user/signup-form"
 
 export async function getSession() {
@@ -81,6 +83,24 @@ export async function findEmail(email: string) {
 }
 
 export async function updateUserInfo(userId: string, name: string, image?: string) {
+
+  const exists = await prisma.user.findUnique({
+    where: {
+      id: userId
+    }
+  })
+
+  if (!exists) return
+
+  if (image) {
+    await s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: `images/${exists.image}`,
+      })
+    )
+  }
+
   const user = await prisma.user.update({
     where: {
       id: userId
