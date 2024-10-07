@@ -10,6 +10,8 @@ import Link from 'next/link'
 import { FiUpload } from "react-icons/fi";
 import EditArtistModal from './reusables/edit-artist-modal'
 import DeleteModal from './reusables/delete-modal'
+import { IoIosAddCircleOutline } from "react-icons/io";
+import { FaCheck } from 'react-icons/fa'
 
 type EllipsisProps = {
   playlistName: string | null | undefined
@@ -18,6 +20,9 @@ type EllipsisProps = {
   validUser: boolean
   urlId?: string
   artistName?: string | null
+  isInLibrary?: { id: string } | null
+  addOtherUserPlaylistWithId?: () => Promise<void>
+  deleteFromLibraryWithId?: () => Promise<void>
 }
 
 export default function Ellipsis({
@@ -27,6 +32,9 @@ export default function Ellipsis({
   validUser,
   urlId,
   artistName,
+  isInLibrary,
+  addOtherUserPlaylistWithId,
+  deleteFromLibraryWithId,
 }: EllipsisProps) {
   const [isCreate, setIsCreate] = useState(false)
 
@@ -62,7 +70,7 @@ export default function Ellipsis({
       <div
         ref={divRef}
         className={`
-          absolute bg-neutral-800 rounded shadow w-48 p-1
+          absolute bg-neutral-800 rounded shadow w-max p-1
           ${!isCreate && 'hidden'} overflow-hidden text-sm
         `}
       >
@@ -94,12 +102,24 @@ export default function Ellipsis({
           </>
         ) : (
           <>
-            <button
-              // onClick={() => setIsEditOpen(true)}
-              className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
-            >
-              <MdEdit /> Temporary
-            </button>
+            {category !== 'Artist' && (
+              <form action={isInLibrary ? deleteFromLibraryWithId : addOtherUserPlaylistWithId}>
+                <button
+                  onClick={() => setIsCreate(false)}
+                  className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+                >
+                  {isInLibrary ? (
+                    <>
+                      <FaCheck className={`${isInLibrary && 'bg-green-500 text-black p-0.5 rounded-full'}`} /> Remove from Your Library
+                    </>
+                  ) : (
+                    <>
+                      <IoIosAddCircleOutline /> Add to Your Library
+                    </>
+                  )}
+                </button>
+              </form>
+            )}
           </>
         )}
       </div>
@@ -110,7 +130,7 @@ export default function Ellipsis({
           setIsDeleteOpen={setIsOpen}
           action={deletePlaylistWithId}
           category={category}
-          // onSubmit={onSubmit}
+        // onSubmit={onSubmit}
         />
       )}
       {isEditOpen && (

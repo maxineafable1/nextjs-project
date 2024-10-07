@@ -1,4 +1,4 @@
-import { FieldError, UseFormRegister } from "react-hook-form";
+import { FieldError, UseFormRegister, UseFormTrigger } from "react-hook-form";
 import { FaSpotify } from "react-icons/fa";
 import { SignupFormData } from "../signup-form";
 import InputForm from "@/components/input-form";
@@ -22,8 +22,8 @@ export default function Email({ register, errors }: Props) {
           name="email"
           register={register}
           placeholder="name@domain.com"
-          errors={errors}
         />
+        <p className="text-sm text-red-400 mt-1">{errors?.message}</p>
       </div>
     </div>
   )

@@ -19,9 +19,18 @@ type PlaylistContainerProps = {
   active: boolean
   category: string | undefined
   currUserId: string
+  isInLibrary: { id: string } | null
+  likedSongIds: string[] | undefined
 }
 
-export default function PlaylistContainer({ playlistSongs, active, category, currUserId }: PlaylistContainerProps) {
+export default function PlaylistContainer({
+  playlistSongs,
+  active,
+  category,
+  currUserId,
+  isInLibrary,
+  likedSongIds,
+}: PlaylistContainerProps) {
   const [totalDuration, setTotalDuration] = useState<number | undefined>(undefined)
 
   return (
@@ -47,6 +56,8 @@ export default function PlaylistContainer({ playlistSongs, active, category, cur
         category={category}
         playlistUserId={playlistSongs?.userId}
         currUserId={currUserId}
+        isInLibrary={isInLibrary}
+        likedSongIds={likedSongIds}
       />
     </>
   )

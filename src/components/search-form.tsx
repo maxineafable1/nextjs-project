@@ -42,11 +42,16 @@ export default function SearchForm({
   const [value, setValue] = useState('')
 
   useEffect(() => {
-    async function search() {
-      return await searchSong(value, category)
-    }
-    search().then(songlist => setSongs(songlist))
-    console.log('search song post')
+    // if (!value) return
+    const timeoutId = setTimeout(() => {
+      async function search() {
+        return await searchSong(value, category)
+      }
+      search().then(songlist => setSongs(songlist))
+    }, 500)
+
+    return () => clearTimeout(timeoutId)
+    // console.log('search song post')
   }, [value, category])
 
   const { ref } = register('song')

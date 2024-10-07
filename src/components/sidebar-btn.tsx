@@ -7,6 +7,7 @@ import { MdLibraryMusic } from "react-icons/md";
 import Link from 'next/link';
 import useModal from '@/hooks/useModal';
 import CreateAlbumModal from './reusables/create-album-modal';
+import { LuLibrary } from "react-icons/lu";
 
 type SidebarButtonProps = {
   action: () => void
@@ -46,12 +47,15 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
 
   return (
     <>
-      <div className="flex justify-between">
-        <h2 className="text-neutral-300 font-semibold">Your library</h2>
+      <div className="flex justify-between items-center mb-4">
+        <button className='flex items-center gap-2 text-2xl text-neutral-400 hover:text-white'>
+          <LuLibrary />
+          <span className='text-base font-semibold'>Your library</span>
+        </button>
         <div className='relative'>
           <button
             ref={plusBtnRef}
-            className='hover:bg-neutral-800 rounded-full'
+            className='hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-full'
             onClick={() => setIsCreate(true)}
           >
             <IoIosAdd fontSize='1.75rem' />
@@ -73,7 +77,7 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
                   <BiSolidPlaylist fontSize='1.25rem' />Create a new playlist
                 </button>
               </form>
-              <button 
+              <button
                 onClick={() => setIsOpen(true)}
                 className='flex items-center w-full gap-2 hover:bg-neutral-700 p-2'
               >
@@ -122,7 +126,7 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
         </div>
       )}
       {isOpen && (
-        <CreateAlbumModal 
+        <CreateAlbumModal
           dialogRef={dialogRef}
           isOpen={isOpen}
           setIsOpen={setIsOpen}

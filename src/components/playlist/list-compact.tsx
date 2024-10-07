@@ -62,7 +62,7 @@ export default function ListCompact({ viewAs, setViewAs }: ListCompactProps) {
       <div
         ref={divRef}
         className={`
-          absolute bg-neutral-800 rounded shadow w-40 p-2
+          absolute bg-neutral-800 rounded shadow w-40 p-2 z-10
           ${!isOpen && 'hidden'} overflow-hidden text-sm right-0
         `}
       >

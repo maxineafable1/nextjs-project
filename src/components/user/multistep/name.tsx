@@ -10,8 +10,8 @@ export default function Name({ register, errors }: Props) {
         id="name"
         name="name"
         register={register}
-        errors={errors}
       />
+      <p className="text-sm text-red-400 mt-1">{errors?.message}</p>
     </div>
   )
 }

@@ -55,8 +55,8 @@ export default function LoginForm() {
             register={register}
             name="email"
             placeholder="Email Address"
-            errors={errors.email}
           />
+          <p className="text-sm text-red-400 mt-1">{errors?.email?.message}</p>
         </div>
         <div className="grid gap-1">
           <label
@@ -69,9 +69,9 @@ export default function LoginForm() {
             register={register}
             name="password"
             placeholder="Password"
-            errors={errors.password}
             type="password"
           />
+          <p className="text-sm text-red-400 mt-1">{errors?.password?.message}</p>
         </div>
         <button className="bg-green-500 hover:bg-green-400 hover:scale-105 py-2 font-bold text-black rounded-full mt-4">Login</button>
       </form>

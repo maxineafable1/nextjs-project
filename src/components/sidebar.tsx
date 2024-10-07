@@ -6,21 +6,32 @@ import SidebarButton from './sidebar-btn'
 
 export default async function Sidebar() {
   const session = await getSession()
-
-  const playlists = await prisma.playlist.findMany({
+  const library = await prisma.library.findFirst({
     where: {
       userId: session.userId
     },
     include: {
-      songs: {
+      playlists: {
+        // where: {
+        //   userId: session.userId
+        // },
         include: {
-          artist: {
+          songs: {
+            include: {
+              artist: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          },
+          user: {
             select: {
               name: true
             }
           }
         }
-      },
+      }
     }
   })
 
@@ -32,7 +43,7 @@ export default async function Sidebar() {
       />
       {session.active && (
         <ul>
-          {playlists?.map(playlist => (
+          {library?.playlists?.map(playlist => (
             <PlaylistCard
               key={playlist.id}
               songs={playlist.songs}
@@ -43,6 +54,7 @@ export default async function Sidebar() {
               active={session.active}
               playlistUserId={playlist.userId}
               currUserId={session.userId}
+              playlistOwner={playlist.user.name}
             />
           ))}
         </ul>

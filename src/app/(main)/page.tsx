@@ -7,7 +7,10 @@ export default async function Home() {
   const session = await getSession()
   const playlists = await prisma.playlist.findMany({
     where: {
-      category: { equals: 'Playlist' }
+      category: { equals: 'Playlist' },
+      NOT: {
+        name: { equals: 'Liked Songs' }
+      }
     },
     include: {
       songs: {

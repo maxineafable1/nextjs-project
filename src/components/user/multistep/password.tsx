@@ -1,3 +1,4 @@
+import InputForm from "@/components/input-form";
 import { Props } from "./email";
 
 const passwordNeeds = [
@@ -12,11 +13,11 @@ export default function Password({ register, errors }: Props) {
   return (
     <div className="grid gap-1 mt-8">
       <label htmlFor="password" className='font-semibold text-sm'>Password</label>
-      <input
-        type="password"
+      <InputForm
         id="password"
-        className="px-3 py-2 rounded bg-inherit border border-white"
-        {...register('password')}
+        name="password"
+        type="password"
+        register={register}
       />
       <div className="text-sm my-4">
         <p className="font-semibold">Your password must contain at least</p>

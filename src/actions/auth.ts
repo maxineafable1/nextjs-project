@@ -60,6 +60,23 @@ export async function signup(formData: SignupFormData) {
     }
   })
 
+  // liked songs playlist on user creation
+  const likedSongsPlaylist = await prisma.playlist.create({
+    data: {
+      userId: newUser.id,
+      category: 'Playlist',
+      name: 'Liked Songs',
+    }
+  })
+
+  // Your Library on user creation
+  await prisma.library.create({
+    data: {
+      userId: newUser.id,
+      playlistIds: { set: [likedSongsPlaylist.id] }
+    }
+  })
+
   session.active = true
   session.userId = newUser.id
   session.name = newUser.name as string

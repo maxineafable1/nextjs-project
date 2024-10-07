@@ -34,15 +34,26 @@ model User {
   image    String?
   Song     Song[]
   Playlist Playlist[]
+  Library  Library?
 }
 
 model Playlist {
-  id       String   @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
-  image    String?
-  user     User     @relation(fields: [userId], references: [id])
-  userId   String   @db.ObjectId
-  songs    Song[]   @relation(fields: [songIds], references: [id])
-  songIds  String[] @db.ObjectId
-  category String
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  image      String?
+  user       User      @relation(fields: [userId], references: [id])
+  userId     String    @db.ObjectId
+  songs      Song[]    @relation(fields: [songIds], references: [id])
+  songIds    String[]  @db.ObjectId
+  category   String
+  libraries  Library[] @relation(fields: [libraryIds], references: [id])
+  libraryIds String[]  @db.ObjectId
+}
+
+model Library {
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String     @unique @db.ObjectId
+  playlists   Playlist[] @relation(fields: [playlistIds], references: [id])
+  playlistIds String[]   @db.ObjectId
 }

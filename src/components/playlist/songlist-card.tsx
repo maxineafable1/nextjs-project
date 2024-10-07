@@ -12,6 +12,10 @@ import Link from "next/link"
 import Ellipsis from "../ellipsis"
 import ListCompact from "./list-compact"
 import UnauthModal from "../reusables/unauth-modal"
+import { IoIosAddCircleOutline } from "react-icons/io"
+import { addOtherUserPlaylist, deleteFromLibrary } from "@/actions/song"
+import { useParams } from "next/navigation"
+import { FaCheck } from "react-icons/fa6";
 
 type SonglistCardProps = {
   songs: SampleTypeForPlaylist[] | undefined
@@ -22,6 +26,8 @@ type SonglistCardProps = {
   category: string | undefined
   currUserId: string
   playlistUserId: string | undefined
+  isInLibrary: { id: string } | null
+  likedSongIds: string[] | undefined
 }
 
 export default function SonglistCard({
@@ -33,6 +39,8 @@ export default function SonglistCard({
   category,
   currUserId,
   playlistUserId,
+  isInLibrary,
+  likedSongIds,
 }: SonglistCardProps) {
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
   const { dialogRef, isOpen, setIsOpen } = useModal()
@@ -56,11 +64,15 @@ export default function SonglistCard({
 
   const validUser = active && currUserId === playlistUserId
 
+  const { id: playlistUrlId } = useParams()
+  const addOtherUserPlaylistWithId = addOtherUserPlaylist.bind(null, playlistUrlId as string, category as string)
+  const deleteFromLibraryWithId = deleteFromLibrary.bind(null, playlistUrlId as string, category as string)
+
   return (
     <>
       {songs?.length !== 0 && (
         <>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6 my-4">
             <button
               onClick={e => {
                 if (!songs) return
@@ -72,16 +84,43 @@ export default function SonglistCard({
                   setIsOpen(true)
                 }
               }}
-              className="bg-green-500 p-4 my-4 rounded-full hover:scale-110 hover:bg-green-400"
+              className="bg-green-500 p-4 rounded-full hover:scale-110 hover:bg-green-400"
             >
               <FaPlay fill="black" />
             </button>
-            <Ellipsis
-              playlistName={playlistName}
-              image={image}
-              category={category}
-              validUser={validUser}
-            />
+            {!validUser && (
+              <form
+                action={isInLibrary ? deleteFromLibraryWithId : addOtherUserPlaylistWithId}
+              >
+                <button
+                  className={`
+                    text-neutral-400 hover:text-white hover:scale-105
+                    ${isInLibrary && 'bg-green-500 p-2 rounded-full'}
+                  `}
+                >
+                  {isInLibrary ? (
+                    <FaCheck
+                      title={isInLibrary ? 'Remove from Your Library' : 'Add to Your Library'}
+                      // fontSize='1.5rem'
+                      className={`text-black`}
+                    />
+                  ) : (
+                    <IoIosAddCircleOutline fontSize='1.5rem' />
+                  )}
+                </button>
+              </form>
+            )}
+            {playlistName !== 'Liked Songs' && (
+              <Ellipsis
+                playlistName={playlistName}
+                image={image}
+                category={category}
+                validUser={validUser}
+                isInLibrary={isInLibrary}
+                addOtherUserPlaylistWithId={addOtherUserPlaylistWithId}
+                deleteFromLibraryWithId={deleteFromLibraryWithId}
+              />
+            )}
             <ListCompact
               viewAs={viewAs}
               setViewAs={setViewAs}
@@ -100,7 +139,17 @@ export default function SonglistCard({
             <p className="w-5 text-center">#</p>
             <p className="flex-1">Title</p>
             {category === 'Playlist' ? (
-              <p className="mx-auto flex-1">{viewAs === 'List' ? 'Album' : 'Artist'}</p>
+              <>
+                {viewAs === 'Compact' ? (
+                  <>
+                    <p className="flex-1">Artist</p>
+                    <p className="flex-1">Album</p>
+                  </>
+                ) : (
+                  <p className="flex-1">Album</p>
+                )}
+              </>
+              // <p className="mx-auto flex-1">{viewAs === 'List' ? 'Album' : 'Artist'}</p>
             ) : (
               <p className="mx-auto flex-1">{viewAs === 'Compact' && 'Artist'}</p>
             )}
@@ -132,8 +181,11 @@ export default function SonglistCard({
             viewAs={viewAs}
             artistPage={false}
             albumName={song.playlists?.at(0)?.name}
+            albumId={song.playlistIds.at(0)}
             category={category}
             validUser={validUser}
+            likedSongIds={likedSongIds}
+            playlistName={playlistName}
           />
         ))}
       </ul>

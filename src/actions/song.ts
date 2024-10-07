@@ -110,6 +110,16 @@ export async function createPlaylist() {
     }
   })
 
+  // automatically add playlist to library
+  await prisma.library.update({
+    where: {
+      userId: session.userId,
+    },
+    data: {
+      playlistIds: { push: playlist.id }
+    }
+  })
+
   redirect(`/playlist/${playlist.id}`)
 }
 
@@ -226,6 +236,23 @@ export async function deletePlaylist(playlistId: string) {
     })
   )
 
+  const libraryPlaylist = await prisma.library.findFirst({
+    where: {
+      userId: session.userId,
+      playlistIds: { has: playlistId }
+    }
+  })
+
+  // remove from library when playlist is deleted
+  await prisma.library.update({
+    where: {
+      userId: session.userId,
+    },
+    data: {
+      playlistIds: libraryPlaylist?.playlistIds.filter(playlist => playlist !== playlistId)
+    }
+  })
+
   await prisma.playlist.delete({
     where: {
       userId: session.userId,
@@ -318,5 +345,130 @@ export async function createAlbum(albumName: string, albumImage?: string) {
     }
   })
 
+  // automatically add album to library
+  await prisma.library.update({
+    where: {
+      userId: session.userId,
+    },
+    data: {
+      playlistIds: { push: album.id }
+    }
+  })
+
   redirect(`/album/${album.id}`)
+}
+
+export async function addOtherUserPlaylist(playlistId: string, category: string) {
+  const session = await getSession()
+
+  const exists = await prisma.library.findFirst({
+    where: {
+      userId: session.userId,
+      playlistIds: { has: playlistId }
+    }
+  })
+
+  if (exists) return
+
+  await prisma.library.update({
+    where: {
+      userId: session.userId,
+    },
+    data: {
+      playlistIds: { push: playlistId }
+    }
+  })
+
+  revalidatePath(category === 'Album' ? `/album/${playlistId}` : `/playlist/${playlistId}`)
+}
+
+export async function deleteFromLibrary(playlistId: string, category: string) {
+  const session = await getSession()
+
+  const libraryPlaylist = await prisma.library.findFirst({
+    where: {
+      userId: session.userId,
+      playlistIds: { has: playlistId }
+    }
+  })
+
+  if (!libraryPlaylist) return
+
+  // remove from library when playlist is deleted
+  await prisma.library.update({
+    where: {
+      userId: session.userId,
+    },
+    data: {
+      playlistIds: libraryPlaylist?.playlistIds.filter(playlist => playlist !== playlistId)
+    }
+  })
+
+  revalidatePath(category === 'Album' ? `/album/${playlistId}` : `/playlist/${playlistId}`)
+}
+
+export async function saveToLikedSongs(songId: string) {
+  const session = await getSession()
+
+  const likedSongsId = await prisma.playlist.findFirst({
+    where: {
+      AND: [
+        {
+          userId: session.userId,
+          name: { equals: 'Liked Songs' }
+        }
+      ]
+    },
+    select: {
+      id: true
+    }
+  })
+
+  if (!likedSongsId) return
+
+  const likedSongs = await prisma.playlist.update({
+    where: {
+      id: likedSongsId.id,
+      userId: session.userId,
+      name: { equals: 'Liked Songs' },
+    },
+    data: {
+      songIds: { push: songId }
+    }
+  })
+
+  revalidatePath(`/playlist/${likedSongs.id}`)
+}
+
+export async function removeFromLikedSongs(songId: string) {
+  const session = await getSession()
+  const exists = await prisma.playlist.findFirst({
+    where: {
+      AND: [
+        {
+          userId: session.userId,
+          name: { equals: 'Liked Songs' },
+          songIds: { has: songId }
+        }
+      ]
+    },
+    select: {
+      id: true,
+      songIds: true
+    }
+  })
+
+  if (!exists) return
+
+  const playlist = await prisma.playlist.update({
+    where: {
+      userId: session.userId,
+      id: exists.id,
+    },
+    data: {
+      songIds: exists.songIds.filter(song => song !== songId)
+    }
+  })
+
+  revalidatePath(`/playlist/${playlist.id}`)
 }

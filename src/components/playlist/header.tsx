@@ -48,15 +48,16 @@ export default function Header({
   }
 
   const validUser = active && currUserId === userId
+  const notLikedSongs = validUser && name !== 'Liked Songs'
 
   return (
     <div className="flex items-center gap-6">
       <div
         className="w-36 aspect-square block"
-        onMouseEnter={() => validUser && setIsEditPhoto(true)}
-        onMouseLeave={() => validUser && setIsEditPhoto(false)}
+        onMouseEnter={() => notLikedSongs && setIsEditPhoto(true)}
+        onMouseLeave={() => notLikedSongs && setIsEditPhoto(false)}
         onClick={() => {
-          if (validUser)
+          if (notLikedSongs)
             isEditPhoto && setIsOpen(true)
         }}
       >
@@ -104,8 +105,8 @@ export default function Header({
       </div>
       <div>
         <h2
-          className={`text-7xl font-extrabold mb-8 ${validUser && 'cursor-pointer'}`}
-          onClick={() => validUser && setIsOpen(true)}
+          className={`text-7xl font-extrabold mb-8 ${notLikedSongs && 'cursor-pointer'}`}
+          onClick={() => notLikedSongs && setIsOpen(true)}
         >
           {name}</h2>
         <div className="flex items-center gap-2 text-sm">

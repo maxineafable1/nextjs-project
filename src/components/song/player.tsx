@@ -5,11 +5,22 @@ import { useEffect, useRef, useState } from "react";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { CiVolumeHigh, CiVolumeMute } from "react-icons/ci";
 import { IoPlaySkipForward, IoPlaySkipBackSharp } from "react-icons/io5";
+import { FaShuffle } from "react-icons/fa6";
+import { LuRepeat, LuRepeat1 } from "react-icons/lu";
 import Link from "next/link";
+
+const repeatTitle = [
+  'Enable repeat',
+  'Enable repeat one',
+  'Disable repeat'
+]
 
 export default function Player() {
   const { currentSong, setCurrentSong, currentAlbum } = useSongContext()
   const [playing, setPlaying] = useState(false)
+  const [isShuffle, setIsShuffle] = useState(false)
+  const [repeatCount, setRepeatCount] = useState(0)
+  const [loopCount, setLoopCount] = useState(0)
 
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -63,13 +74,14 @@ export default function Player() {
 
   useEffect(() => {
     // turns off player when playlist ends
+    if (repeatCount > 0) return
     const truncDuration = Math.trunc(duration)
     if (currentTime === truncDuration) {
       const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
       if (currentIndex === currentAlbum.length - 1)
         setPlaying(false)
     }
-  }, [currentTime, duration])
+  }, [currentTime, duration, repeatCount])
 
   useEffect(() => {
     // autoplay music
@@ -112,17 +124,50 @@ export default function Player() {
           preload="metadata"
           onEnded={() => {
             const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
-            if (currentIndex < currentAlbum.length - 1)
+            if (repeatCount > 0) {
+              if (loopCount < repeatCount) {
+                setLoopCount(prev => prev + 1)
+                audioRef.current?.play()
+                setPlaying(true)
+              } else {
+                // auto next after loop ends
+                if (currentIndex < currentAlbum.length - 1) {
+                  setCurrentSong(currentAlbum[currentIndex + 1])
+                }
+                // close player if last song ends
+                setRepeatCount(0)
+                setLoopCount(0)
+                setPlaying(false)
+              }
+              return
+            }
+            if (isShuffle) {
+              const random = Math.floor(Math.random() * currentAlbum?.length)
+              setCurrentSong(currentAlbum[random])
+            } else if (currentIndex < currentAlbum.length - 1) {
               setCurrentSong(currentAlbum[currentIndex + 1])
+            }
           }}
         >
           <source src={`${process.env.SONG_URL}/${currentSong.song}`} type="audio/mpeg" />
         </audio>
       )}
       <div className="flex flex-1 flex-col gap-2 items-center justify-center max-w-lg">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 text-lg">
+          <button
+            title="Enable shuffle"
+            className={`text-neutral-300 hover:text-neutral-200 hover:scale-105 relative`}
+            onClick={() => setIsShuffle(prev => !prev)}
+            disabled={!currentSong}
+          >
+            <FaShuffle
+              className={`${isShuffle && 'fill-green-400'}`}
+            />
+            {isShuffle && <div className="bg-green-400 absolute left-1/2 -translate-x-1/2 rounded-full w-1 h-1"></div>}
+          </button>
           <button
             title="Previous"
+            disabled={!currentSong}
             onClick={() => {
               const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
               if (currentIndex > 0)
@@ -130,7 +175,7 @@ export default function Player() {
             }}
             className="text-neutral-300 hover:text-neutral-200 hover:scale-105"
           >
-            <IoPlaySkipBackSharp fontSize='1.5rem' />
+            <IoPlaySkipBackSharp />
           </button>
           <button
             disabled={!currentSong}
@@ -138,12 +183,13 @@ export default function Player() {
             onClick={() => {
               setPlaying(prev => !prev)
             }}
-            className="bg-white rounded-full p-2 text-center hover:scale-105 hover:bg-neutral-200"
+            className="bg-white rounded-full text-base p-2 text-center hover:scale-105 hover:bg-neutral-200"
           >
             {playing ? <FaPause fill="black" /> : <FaPlay fill="black" />}
           </button>
           <button
             title="Next"
+            disabled={!currentSong}
             onClick={() => {
               const currentIndex = currentAlbum.findIndex(songs => songs.id === currentSong?.id)
               if (currentIndex < currentAlbum.length - 1)
@@ -151,7 +197,24 @@ export default function Player() {
             }}
             className="text-neutral-300 hover:text-neutral-200 hover:scale-105"
           >
-            <IoPlaySkipForward fontSize='1.5rem' />
+            <IoPlaySkipForward />
+          </button>
+          <button
+            title={`${repeatTitle[repeatCount]}`}
+            disabled={!currentSong}
+            className="text-neutral-300 hover:text-neutral-200 hover:scale-105 relative"
+            onClick={() => setRepeatCount(prev => prev < 2 ? prev + 1 : 0)}
+          >
+            {repeatCount > 1 ? (
+              <LuRepeat1
+                className={`${repeatCount !== 0 && 'stroke-green-400'}`}
+              />
+            ) : (
+              <LuRepeat
+                className={`${repeatCount !== 0 && 'stroke-green-400'}`}
+              />
+            )}
+            {repeatCount > 0 && <div className="bg-green-400 absolute left-1/2 -translate-x-1/2 rounded-full w-1 h-1"></div>}
           </button>
         </div>
         <div className="flex items-center gap-2 w-full">

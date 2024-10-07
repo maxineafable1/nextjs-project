@@ -1,9 +1,10 @@
-import { deleteSongFromPlaylist } from "@/actions/song";
+import { deleteSongFromPlaylist, removeFromLikedSongs, saveToLikedSongs } from "@/actions/song";
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { FaEllipsis } from "react-icons/fa6";
-import { MdDeleteOutline } from "react-icons/md";
-import { FaUser } from "react-icons/fa";
+import { MdDeleteOutline, MdLibraryMusic } from "react-icons/md";
+import { FaCheck, FaUser } from "react-icons/fa";
+import { IoIosAddCircleOutline } from "react-icons/io";
 
 type SongEllipsisProps = {
   isCreate: boolean
@@ -16,6 +17,9 @@ type SongEllipsisProps = {
   setIsDeleteOpen: React.Dispatch<React.SetStateAction<boolean>>
   category: string | undefined
   validUser: boolean
+  albumId: string | undefined
+  likedSongIds: string[] | undefined
+  playlistName: string | undefined
 }
 
 export default function SongEllipsis({
@@ -28,7 +32,10 @@ export default function SongEllipsis({
   artistPage,
   setIsDeleteOpen,
   category,
-  validUser
+  validUser,
+  albumId,
+  likedSongIds,
+  playlistName,
 }: SongEllipsisProps) {
   const divRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
@@ -52,6 +59,8 @@ export default function SongEllipsis({
     }
   }, [isCreate])
 
+  const saveToLikedSongsWithId = saveToLikedSongs.bind(null, songId)
+  const removeFromLikedSongsWithId = removeFromLikedSongs.bind(null, songId)
 
   return (
     <div className="relative">
@@ -67,13 +76,13 @@ export default function SongEllipsis({
       <div
         ref={divRef}
         className={`
-          absolute bg-neutral-800 rounded shadow w-52 p-1
+          absolute bg-neutral-800 rounded shadow w-max p-1
           ${!isCreate && 'hidden'} overflow-hidden text-sm right-0
         `}
       >
         {!artistPage ? (
           <>
-            {validUser ? (
+            {(validUser && playlistName !== 'Liked Songs') ? (
               <>
                 <form action={deleteSongFromPlaylistWithId}>
                   <button
@@ -93,6 +102,14 @@ export default function SongEllipsis({
             >
               <FaUser /> Go to artist
             </Link>
+            {(albumId && category === 'Playlist') && (
+              <Link
+                href={`/album/${albumId}`}
+                className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+              >
+                <MdLibraryMusic /> Go to album
+              </Link>
+            )}
           </>
         ) : (
           <>
@@ -111,21 +128,33 @@ export default function SongEllipsis({
               </>
             ) : (
               <>
-                <button
-                  // onClick={() => {
-                  //   setIsDeleteOpen(true)
-                  //   setIsCreate(false)
-                  //   setIsHover(false)
-                  // }}
-                  className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
-                >
-                  <MdDeleteOutline /> Temporary
-                </button>
+                {albumId && (
+                  <Link
+                    href={`/album/${albumId}`}
+                    className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+                  >
+                    <MdLibraryMusic /> Go to album
+                  </Link>
+                )}
               </>
             )}
-
           </>
         )}
+        <form action={!likedSongIds?.includes(songId) ? saveToLikedSongsWithId : removeFromLikedSongsWithId}>
+          <button
+            className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
+          >
+            {!likedSongIds?.includes(songId) ? (
+              <>
+                <IoIosAddCircleOutline /> Save to your Liked Songs
+              </>
+            ) : (
+              <>
+                <FaCheck className={`bg-green-500 text-black p-0.5 rounded-full`} /> Remove from your Liked Songs
+              </>
+            )}
+          </button>
+        </form>
       </div>
     </div>
   )

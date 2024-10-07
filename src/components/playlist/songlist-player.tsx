@@ -1,14 +1,15 @@
 import Image from 'next/image'
 import React, { Dispatch, MutableRefObject, SetStateAction, useEffect, useState } from 'react'
 import { SampleTypeForPlaylist } from '../song/card'
-import { FaPlay } from 'react-icons/fa'
+import { FaCheck, FaPlay } from 'react-icons/fa'
 import useModal from '@/hooks/useModal'
 import Link from 'next/link'
 import SongEllipsis from '../song/ellipsis'
 import { useParams } from 'next/navigation'
-import { deleteSong } from '@/actions/song'
+import { deleteSong, saveToLikedSongs } from '@/actions/song'
 import UnauthModal from '../reusables/unauth-modal'
 import DeleteModal from '../reusables/delete-modal'
+import { IoIosAddCircleOutline } from 'react-icons/io'
 // import HoverPlayButton from '../hover-play-btn'
 
 type SonglistPlayerProps = {
@@ -25,6 +26,9 @@ type SonglistPlayerProps = {
   albumName?: string | null
   category: string | undefined
   validUser: boolean
+  albumId: string | undefined
+  likedSongIds: string[] | undefined
+  playlistName: string | undefined
 }
 
 export default function SonglistPlayer({
@@ -41,6 +45,9 @@ export default function SonglistPlayer({
   albumName,
   category,
   validUser,
+  albumId,
+  likedSongIds,
+  playlistName,
 }: SonglistPlayerProps) {
   const [isHover, setIsHover] = useState(false)
 
@@ -65,6 +72,8 @@ export default function SonglistPlayer({
       setIsHover(false)
     }
   }, [isOpen])
+
+  const saveToLikedSongsWithId = saveToLikedSongs.bind(null, song.id)
 
   return (
     <li
@@ -100,7 +109,7 @@ export default function SonglistPlayer({
           setIsOpen={setIsOpen}
         />
       )}
-      <div className="flex items-center gap-2 w-full">
+      <div className="flex items-center gap-2 w-full relative">
         <audio
           key={song.song}
           ref={ref => {
@@ -128,7 +137,9 @@ export default function SonglistPlayer({
                 className="aspect-square max-w-10 object-cover block rounded-md"
               />
               <div >
-                <p className='hover:underline'>{song.title}</p>
+                <p className='hover:underline'>
+                  {song.title}
+                </p>
                 {category !== 'Artist' && (
                   <Link
                     href={`/artist/${song.artistId}`}
@@ -143,32 +154,81 @@ export default function SonglistPlayer({
               </div>
             </div>
             {category === 'Playlist' && (
-              <Link
-                href={`/album/${song.playlistIds.at(0)}`}
+              <div
                 className={`
-                hover:underline text-neutral-400 text-sm
-                ${isHover && 'text-white'} mx-auto flex-1
-              `}
+                 text-neutral-400 text-sm
+                  ${isHover && 'text-white'} mx-auto flex-1
+                `}
               >
-                {albumName}
-              </Link>
+                <Link
+                  href={`/album/${song.playlistIds.at(0)}`}
+                  className="hover:underline"
+                >
+                  {albumName}
+                </Link>
+              </div>
             )}
           </>
         ) : (
           <>
-            <p className='hover:underline flex-1'>{song.title}</p>
-            {category !== 'Artist' && (
-              <Link
-                href={`/artist/${song.artistId}`}
-                className={`
-                text-neutral-400 text-sm hover:underline block
-                ${isHover && 'text-white'} mx-auto flex-1
-              `}
-              >
-                {song.artist.name}
-              </Link>
+            <div className='flex-1'>
+              <span className='hover:underline'>
+                {song.title}
+              </span>
+            </div>
+            {category === 'Playlist' && (
+              <>
+                <div
+                  className={`
+                text-neutral-400 text-sm block
+                  ${isHover && 'text-white'} mx-auto flex-1
+                `}
+                >
+                  <Link
+                    href={`/artist/${song.artistId}`}
+                    className='hover:underline'
+                  >
+                    {song.artist.name}
+                  </Link>
+                </div>
+                <div
+                  className={`
+                text-neutral-400 text-sm block
+                  ${isHover && 'text-white'} mx-auto flex-1
+                `}
+                >
+                  <Link
+                    href={`/album/${albumId}`}
+                    className='hover:underline'
+                  >
+                    {albumName}
+                  </Link>
+                </div>
+              </>
             )}
           </>
+        )}
+        {isHover && (
+          <form
+            action={likedSongIds?.includes(song.id) ? '' : saveToLikedSongsWithId}
+            className='absolute right-10'
+          >
+            <button
+              title={`${likedSongIds?.includes(song.id) ? 'Remove from Liked Songs' : 'Add to Liked Songs'}`}
+              className={`hover:scale-110`}
+            >
+              {likedSongIds?.includes(song.id) ? (
+                <FaCheck
+                  className={`bg-green-500 text-black p-1 rounded-full `}
+                />
+              ) : (
+                <IoIosAddCircleOutline
+                  fontSize='1.125rem'
+                  className='text-neutral-400 hover:text-white'
+                />
+              )}
+            </button>
+          </form>
         )}
         <div
           className={`text-sm ${(
@@ -192,6 +252,9 @@ export default function SonglistPlayer({
             setIsDeleteOpen={setIsDeleteOpen}
             category={category}
             validUser={validUser}
+            albumId={albumId}
+            likedSongIds={likedSongIds}
+            playlistName={playlistName}
           />
         )}
       </div>

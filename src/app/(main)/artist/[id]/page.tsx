@@ -3,6 +3,23 @@ import ArtistSongCard from "@/components/artist/artistsong-card"
 import ArtistHeader from "@/components/artist/header"
 import CardGenre from "@/components/song/card"
 import prisma from "@/lib/db"
+import { Metadata } from "next"
+
+export async function generateMetadata({
+  params: { id }
+}: { params: { id: string } }): Promise<Metadata> {
+  const playlistName = await prisma.user.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      name: true,
+    },
+  })
+  return {
+    title: `${playlistName?.name} | Spotify`
+  }
+}
 
 export default async function page({ params: { id } }: { params: { id: string } }) {
   const session = await getSession()
