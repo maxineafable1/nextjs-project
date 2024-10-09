@@ -5,7 +5,9 @@ type InputLabelProps<T extends FieldValues> = {
   name: Path<T>
   id: string
   placeholder?: string
-  type?: 'text' | 'password' | 'checkbox'
+  type?: 'text' | 'password'
+  error: string | undefined
+  autoFocus?: boolean
 }
 
 export default function InputForm<T extends FieldValues>({
@@ -13,7 +15,9 @@ export default function InputForm<T extends FieldValues>({
   name,
   id,
   placeholder,
+  error,
   type = 'text',
+  autoFocus,
 }: InputLabelProps<T>) {
 
   return (
@@ -21,8 +25,15 @@ export default function InputForm<T extends FieldValues>({
       type={type}
       id={id}
       placeholder={placeholder}
-      className="px-3 py-2 rounded bg-inherit border border-white"
+      className={`
+        p-3 rounded bg-inherit 
+        border border-neutral-400 hover:border-white
+        focus-visible:outline focus-visible:border-transparent
+        ${error ? 'border-red-400 outline-red-400' : 'outline-white'}
+        placeholder:text-sm placeholder:font-medium placeholder:text-neutral-400
+      `}
       {...register(name)}
+      autoFocus={autoFocus}
     />
   )
 }

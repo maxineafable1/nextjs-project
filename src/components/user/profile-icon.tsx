@@ -60,16 +60,11 @@ export default function ProfileIcon({ name, image, userId }: ProfileIconProps) {
           className="rounded-full max-w-10 aspect-square object-cover hover:opacity-80 cursor-pointer"
         />
       ) : (
-        // <div
-        //   title={name}
-        //   onClick={() => setIsOpen(true)}
-        //   className="bg-orange-500 rounded-full text-lg font-bold p-1 px-2.5 hover:scale-105 cursor-pointer text-black"
-        // >
-        //   {name[0].toUpperCase()}
-        // </div>
-        <div 
+        <div
           title={name}
-          className="bg-neutral-700 hover:bg-neutral-600 hover:scale-105 rounded-full p-2"
+          className={`
+          bg-neutral-700 hover:bg-neutral-600 hover:scale-105 rounded-full p-2
+          `}
           onClick={() => setIsOpen(true)}
         >
           <FaUser className="text-neutral-400" />
@@ -77,7 +72,7 @@ export default function ProfileIcon({ name, image, userId }: ProfileIconProps) {
       )}
       <ul
         className={`
-          absolute bg-neutral-800 rounded shadow p-2 right-0 z-10
+          absolute bg-neutral-800 rounded shadow p-1 right-0 z-10
           ${!isOpen && 'hidden'} w-40 top-10
         `}
       >

@@ -2,6 +2,7 @@ import { FieldError, UseFormRegister, UseFormTrigger } from "react-hook-form";
 import { FaSpotify } from "react-icons/fa";
 import { SignupFormData } from "../signup-form";
 import InputForm from "@/components/input-form";
+import ErrorMessage from "@/components/error-message";
 
 export type Props = {
   register: UseFormRegister<SignupFormData>
@@ -12,8 +13,8 @@ export default function Email({ register, errors }: Props) {
   return (
     <div className="max-w-xs mx-auto">
       <div className="grid place-items-center text-center mb-8">
-        <FaSpotify fontSize='2rem' />
-        <h2 className="text-white text-5xl font-bold">Sign up to start listening</h2>
+        <FaSpotify fontSize='2.5rem' />
+        <h2 className="text-white text-5xl font-bold mt-4">Sign up to start listening</h2>
       </div>
       <div className='grid gap-1'>
         <label htmlFor="email" className='font-semibold text-sm'>Email address</label>
@@ -22,8 +23,10 @@ export default function Email({ register, errors }: Props) {
           name="email"
           register={register}
           placeholder="name@domain.com"
+          error={errors?.message}
+          autoFocus
         />
-        <p className="text-sm text-red-400 mt-1">{errors?.message}</p>
+        <ErrorMessage message={errors?.message} />
       </div>
     </div>
   )

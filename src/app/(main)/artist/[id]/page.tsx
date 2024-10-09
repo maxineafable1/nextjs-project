@@ -4,11 +4,13 @@ import ArtistHeader from "@/components/artist/header"
 import CardGenre from "@/components/song/card"
 import prisma from "@/lib/db"
 import { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { Suspense } from "react"
 
 export async function generateMetadata({
   params: { id }
 }: { params: { id: string } }): Promise<Metadata> {
-  const playlistName = await prisma.user.findUnique({
+  const artistName = await prisma.user.findUnique({
     where: {
       id,
     },
@@ -17,7 +19,7 @@ export async function generateMetadata({
     },
   })
   return {
-    title: `${playlistName?.name} | Spotify`
+    title: `${artistName ? artistName.name : 'Page not found'} | Spotify`
   }
 }
 
@@ -44,6 +46,10 @@ export default async function page({ params: { id } }: { params: { id: string } 
       }
     }
   })
+
+  if (!artistSongs) {
+    notFound()
+  }
 
   const artistAlbums = await prisma.playlist.findMany({
     where: {

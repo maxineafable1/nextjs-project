@@ -16,7 +16,7 @@ export const LoginFormSchema = z.object({
 export const SignupFormSchema = z.object({
   name: z
     .string()
-    .min(3, { message: 'Must be at least 3 characters long' })
+    .min(3, { message: 'Enter a name for your profile' })
     .max(100, { message: 'Must not exceed 100 characters' })
     .trim(),
   email: z
@@ -55,7 +55,7 @@ export const SignupFormSchema = z.object({
     }),
   terms: z.literal<boolean>(true, {
     errorMap: () => ({
-      message: 'accept the terms'
+      message: 'Please accept the terms and conditions to continue.'
     })
   }),
 })

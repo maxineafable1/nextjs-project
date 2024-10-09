@@ -3,12 +3,13 @@ import PlaylistContainer from '@/components/playlist/playlist-container'
 import PlaylistForm from '@/components/playlist/playlist-form'
 import prisma from '@/lib/db'
 import { Metadata } from 'next'
+import { notFound } from 'next/navigation'
 import React from 'react'
 
 export async function generateMetadata({
   params: { id }
 }: { params: { id: string } }): Promise<Metadata> {
-  const playlistName = await prisma.playlist.findUnique({
+  const albumName = await prisma.playlist.findUnique({
     where: {
       id,
       category: { equals: 'Album' },
@@ -18,7 +19,7 @@ export async function generateMetadata({
     },
   })
   return {
-    title: `${playlistName?.name} | Spotify`
+    title: `${albumName ? albumName.name : 'Page not found'} | Spotify`
   }
 }
 
@@ -51,6 +52,10 @@ export default async function page({ params: { id } }: { params: { id: string } 
       }
     }
   })
+
+  if (!albumSongs) {
+    notFound()
+  }
 
   const isInLibrary = await prisma.library.findFirst({
     where: {

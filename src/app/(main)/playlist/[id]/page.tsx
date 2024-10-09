@@ -3,6 +3,7 @@ import PlaylistContainer from "@/components/playlist/playlist-container";
 import PlaylistForm from "@/components/playlist/playlist-form";
 import prisma from "@/lib/db";
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
 
 export async function generateMetadata({
   params: { id }
@@ -17,7 +18,7 @@ export async function generateMetadata({
     },
   })
   return {
-    title: `${playlistName?.name} | Spotify`
+    title: `${playlistName ? playlistName.name : 'Page not found'} | Spotify`
   }
 }
 
@@ -50,6 +51,10 @@ export default async function page({ params: { id } }: { params: { id: string } 
       }
     }
   })
+
+  if (!playlistSongs) {
+    notFound()
+  }
 
   const isInLibrary = await prisma.library.findFirst({
     where: {

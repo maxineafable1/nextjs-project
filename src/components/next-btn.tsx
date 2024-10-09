@@ -10,7 +10,7 @@ export default function NextButton({ onClick, className, label }: NextButtonProp
   return (
     <button
       onClick={onClick}
-      className={className}
+      className={`${className} focus-visible:outline outline-white`}
       type='button'
     >
       {label}

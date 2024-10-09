@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { SongFormData } from '../upload-form'
-import { FieldError, UseFormRegister, UseFormSetValue } from 'react-hook-form'
+import { FieldError, UseFormRegister, UseFormSetValue, UseFormWatch } from 'react-hook-form'
 import InputForm from '@/components/input-form'
 import { FaCaretDown } from "react-icons/fa";
+import ErrorMessage from '@/components/error-message';
 
 type TitleProps = {
   register: UseFormRegister<SongFormData>
   titleError?: FieldError | undefined
   genreError?: FieldError | undefined
   setValue: UseFormSetValue<SongFormData>
+  watch: UseFormWatch<SongFormData>
 }
 
 const genres = [
@@ -19,11 +21,12 @@ const genres = [
   'Hiphop',
 ]
 
-export default function Title({ register, titleError, genreError, setValue }: TitleProps) {
+export default function Title({ register, titleError, genreError, setValue, watch }: TitleProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(0)
   const divRef = useRef<HTMLDivElement>(null)
-  const [genreValue, setGenreValue] = useState('')
-  const { ref } = register('genre')
+
+  const genreValue = watch('genre', '')
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -38,8 +41,37 @@ export default function Title({ register, titleError, genreError, setValue }: Ti
   }, [isOpen])
 
   useEffect(() => {
-    setValue('genre', genreValue)
-  }, [genreValue])
+    function accessibility(e: KeyboardEvent) {
+      console.log(e.code)
+      switch (e.code) {
+        case 'Enter': {
+          !isOpen && setIsOpen(true)
+          if (isOpen) {
+            setValue('genre', genres[selectedIndex], { shouldValidate: true })
+            setIsOpen(false)
+          }
+          return
+        }
+        case 'ArrowUp': {
+          e.preventDefault()
+          isOpen && setSelectedIndex(prev => prev > 0 ? prev - 1 : prev)
+          return
+        }
+        case 'ArrowDown': {
+          e.preventDefault()
+          !isOpen && setIsOpen(true)
+          isOpen && setSelectedIndex(prev => prev < genres.length - 1 ? prev + 1 : prev)
+          return
+        }
+        case 'Escape': {
+          isOpen && setIsOpen(false)
+        }
+      }
+    }
+
+    divRef.current?.addEventListener('keydown', accessibility)
+    return () => divRef.current?.removeEventListener('keydown', accessibility)
+  }, [isOpen])
 
   return (
     <>
@@ -49,36 +81,45 @@ export default function Title({ register, titleError, genreError, setValue }: Ti
           id='title'
           name="title"
           register={register}
-          errors={titleError}
+          error={titleError?.message}
+          autoFocus
+          placeholder='e.g. Pusong Bato'
         />
+        <ErrorMessage message={titleError?.message} />
       </div>
       <div className='grid gap-1 mt-4'>
         <label htmlFor="genre" className='font-semibold text-sm'>Genre</label>
         <div
           ref={divRef}
-          className='relative'
+          tabIndex={0}
+          className={`
+            relative flex items-center justify-between rounded p-3 cursor-pointer
+            border border-neutral-400 hover:border-white
+            focus-visible:outline focus-visible:border-transparent
+            ${genreError?.message ? 'border-red-400 outline-red-400' : 'outline-white'}
+          `}
+          onClick={() => setIsOpen(true)}
         >
-          <div
-            className='flex items-center justify-between border border-white rounded px-3 py-2 cursor-pointer'
-            onClick={() => setIsOpen(true)}
-          >
-            <span>
-              {genreValue || 'Select a genre'}
-            </span>
-            <FaCaretDown />
-          </div>
+          <span>
+            {genreValue || 'Select a genre'}
+          </span>
+          <FaCaretDown />
           <ul
             className={`
-              absolute bg-neutral-600 rounded p-2 shadow w-full z-10 mt-1
-              ${!isOpen && 'hidden'}
-            `}
+            absolute bg-neutral-800 rounded p-1 shadow w-full z-10
+            top-12 left-0
+            ${!isOpen && 'hidden'}
+          `}
           >
             {genres.map((genre, i) => (
               <li
                 key={i}
-                className='hover:bg-neutral-500 cursor-pointer p-1 rounded'
+                className={`
+                  hover:bg-neutral-700 font-medium cursor-pointer p-1 rounded
+                  ${i === selectedIndex && 'bg-neutral-400'}
+                `}
                 onClick={() => {
-                  setGenreValue(genre)
+                  setValue('genre', genre, { shouldValidate: true })
                   setIsOpen(false)
                 }}
               >

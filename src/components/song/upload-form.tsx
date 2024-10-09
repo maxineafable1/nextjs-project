@@ -3,16 +3,17 @@
 import { SongFormSchema } from "@/lib/definitions"
 import { FieldError, SubmitHandler, useForm, UseFormRegister } from "react-hook-form"
 import { z } from "zod"
-import Image from "./multistep/image"
+import ImageUpload from "./multistep/image"
 import Audio from "./multistep/audio"
 import Title from "./multistep/title"
 import Lyrics from "./multistep/lyrics"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { FaChevronLeft } from "react-icons/fa"
+import { FaSpotify } from "react-icons/fa"
 import { NewDataType, upload } from "@/actions/song"
 import useMultistep from "@/hooks/useMultistep"
 import NextButton from "../next-btn"
 import BackButton from "../back-btn"
+import ProgressBar from "../progress-bar"
 
 export type SongFormData = z.infer<typeof SongFormSchema>
 
@@ -24,26 +25,29 @@ export type UploadFormProps = {
 const steps = [
   {
     id: 1,
+    bar: 'w-1/4',
     fields: ['image'],
   },
   {
     id: 2,
+    bar: 'w-2/4',
     fields: ['song'],
   },
   {
     id: 3,
+    bar: 'w-3/4',
     fields: ['title', 'genre'],
   },
   {
     id: 4,
+    bar: 'w-full',
     fields: ['lyrics'],
   },
 ]
 
 export default function UploadForm() {
-  // const [state, action] = useFormState(upload, undefined)
-  const { register, formState: { errors }, handleSubmit, trigger, setValue } = useForm<SongFormData>({
-    mode: 'all',
+  const { register, formState: { errors }, handleSubmit, trigger, setValue, watch } = useForm<SongFormData>({
+    mode: 'onChange',
     resolver: zodResolver(SongFormSchema),
     defaultValues: {
       image: '',
@@ -81,29 +85,48 @@ export default function UploadForm() {
   }
 
   const formSteps = [
-    <Image register={register} errors={errors.image as FieldError} />,
-    <Audio register={register} errors={errors.song as FieldError} />,
-    <Title register={register} titleError={errors.title} genreError={errors.genre} setValue={setValue} />,
-    <Lyrics register={register} errors={errors.lyrics} />,
+    <ImageUpload
+      register={register}
+      errors={errors.image as FieldError}
+      watch={watch} />,
+    <Audio
+      register={register}
+      errors={errors.song as FieldError}
+      watch={watch} />,
+    <Title
+      register={register}
+      titleError={errors.title}
+      genreError={errors.genre}
+      setValue={setValue}
+      watch={watch} />,
+    <Lyrics
+      register={register}
+      errors={errors.lyrics} />,
   ]
 
   const {
     currentIndex,
     currentForm,
     lastIndex,
+    barWidth,
     next,
     back,
     formLength,
   } = useMultistep(formSteps, trigger, handleSubmit, onSubmit, steps)
 
   return (
-    <div>
-      <div className="flex items-center gap-2 mb-8">
+    <div className="max-w-lg mx-auto">
+      <FaSpotify fontSize='2.5rem' className='text-center w-full' />
+      <h2 className="font-bold text-2xl text-center mt-4">Upload a track</h2>
+      <ProgressBar barWidth={barWidth[currentIndex]} />
+      <div className="flex items-center gap-2 mb-4">
         <BackButton
           onClick={back}
           className={`${currentIndex === 0 && 'hidden'}`}
         />
-        <p className="text-neutral-400">Step {currentIndex + 1} of {formLength}</p>
+        <p className="text-neutral-400 text-sm">
+          Step {currentIndex + 1} of {formLength}
+        </p>
       </div>
       <form
         onSubmit={handleSubmit(onSubmit)}

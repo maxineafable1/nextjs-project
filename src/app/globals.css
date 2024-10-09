@@ -42,9 +42,9 @@
     @apply bg-green-500
   }
 
-  input[type="file"] {
+  /* input[type="file"] {
     display: none;
-  }
+  } */
 
   /* textarea {
     min-height: 10rem;

@@ -14,6 +14,7 @@ import useMultistep from '@/hooks/useMultistep'
 import ProgressBar from '../progress-bar'
 import NextButton from '../next-btn'
 import BackButton from '../back-btn'
+import Link from 'next/link'
 
 export type SignupFormData = z.infer<typeof SignupFormSchema>
 
@@ -35,14 +36,14 @@ const steps = [
   },
   {
     label: 'Terms and conditions',
-    bar: 'w-3/3',
+    bar: 'w-full',
     fields: ['terms'],
   },
 ]
 
 export default function SignupForm() {
-  const { register, formState: { errors }, handleSubmit, trigger } = useForm<SignupFormData>({
-    mode: 'all',
+  const { register, formState: { errors }, handleSubmit, trigger, watch, setValue } = useForm<SignupFormData>({
+    mode: 'onChange',
     resolver: zodResolver(SignupFormSchema),
   })
 
@@ -57,9 +58,9 @@ export default function SignupForm() {
 
   const formSteps = [
     <Email register={register} errors={errors.email} />,
-    <Password register={register} errors={errors.password} />,
+    <Password register={register} errors={errors.password} watch={watch} />,
     <Name register={register} errors={errors.name} />,
-    <Terms register={register} errors={errors.terms} />,
+    <Terms register={register} errors={errors.terms} watch={watch} setValue={setValue} />,
   ]
 
   const {
@@ -74,34 +75,54 @@ export default function SignupForm() {
   } = useMultistep(formSteps, trigger, handleSubmit, onSubmit, steps)
 
   return (
-    <>
-      <section className="my-8 max-w-md mx-auto">
+    <section className='py-8 from-neutral-950 bg-gradient-to-b to-neutral-900 min-h-full'>
+      <div className="max-w-md mx-auto">
         {currentIndex > 0 && (
           <>
-            <div className="grid place-items-center">
-              <FaSpotify fontSize='2rem' />
-            </div>
+            <FaSpotify fontSize='2.5rem' className='text-center w-full' />
             <ProgressBar barWidth={barWidth[currentIndex]} />
-            <div className="flex items-center gap-4 my-4">
-              <BackButton
-                onClick={back}
-              />
-              <div>
-                <p className="text-neutral-400">Step {currentIndex} of {formLength - 1}</p>
-                <p className="font-semibold">{formLabels[currentIndex]}</p>
-              </div>
-            </div>
           </>
         )}
-        <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col'>
-          {currentForm}
-          <NextButton
-            onClick={next}
-            className={`${currentIndex === 0 && 'max-w-xs mx-auto'} bg-green-500 hover:bg-green-400 w-full rounded-full text-black font-bold py-3 mt-8`}
-            label={lastIndex ? 'Sign up' : 'Next'}
-          />
-        </form>
-      </section>
-    </>
+        <div className={`${currentIndex > 0 && 'flex gap-4 justify-center items-start'}`}>
+          {currentIndex > 0 && (
+            <BackButton
+              onClick={back}
+            />
+          )}
+          <div className={`flex-1 ${currentIndex > 0 && 'max-w-xs'}`}>
+            {currentIndex > 0 && (
+              <div>
+                <p className="text-neutral-400 text-sm">Step {currentIndex} of {formLength - 1}</p>
+                <p className="font-semibold">{formLabels[currentIndex]}</p>
+              </div>
+            )}
+            <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col'>
+              {currentForm}
+              <NextButton
+                onClick={next}
+                className={`
+              ${currentIndex === 0 && 'max-w-xs mx-auto'} 
+              bg-green-500 hover:bg-green-400 w-full 
+              rounded-full text-black font-bold py-3 mt-8
+            `}
+                label={lastIndex ? 'Sign up' : 'Next'}
+              />
+            </form>
+          </div>
+        </div>
+        {currentIndex === 0 && (
+          <p className="text-neutral-300 text-sm text-center mt-8">
+            Already have an account?
+            <span className="pl-1.5">
+              <Link
+                href='/login'
+                className="text-white underline hover:text-green-400 focus-visible:no-underline focus-visible:border-b-2 pb-1 border-b-white outline-none">
+                Log in here
+              </Link>
+            </span>
+          </p>
+        )}
+      </div>
+    </section>
   )
 }
