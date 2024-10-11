@@ -24,6 +24,8 @@ model Song {
   artistId    String     @db.ObjectId
   playlists   Playlist[] @relation(fields: [playlistIds], references: [id])
   playlistIds String[]   @db.ObjectId
+
+  playlistSongs PlaylistSong[]
 }
 
 model User {
@@ -48,6 +50,19 @@ model Playlist {
   category   String
   libraries  Library[] @relation(fields: [libraryIds], references: [id])
   libraryIds String[]  @db.ObjectId
+
+  playlistSongs PlaylistSong[]
+}
+
+model PlaylistSong {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  songId String @db.ObjectId
+  song   Song   @relation(fields: [songId], references: [id])
+
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+  playlistId String   @db.ObjectId
+
+  addedAt    DateTime @default(now())
 }
 
 model Library {

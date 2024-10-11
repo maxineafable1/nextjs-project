@@ -30,17 +30,31 @@ export default async function page({ params: { id } }: { params: { id: string } 
       category: { equals: 'Playlist' },
     },
     include: {
-      songs: {
+      // songs: {
+      //   include: {
+      //     artist: {
+      //       select: {
+      //         name: true
+      //       }
+      //     },
+      //     playlists: {
+      //       select: {
+      //         name: true
+      //       },
+      //     }
+      //   }
+      // },
+      playlistSongs: {
         include: {
-          artist: {
-            select: {
-              name: true
+          song: {
+            include: {
+              artist: {
+                select: { name: true }
+              },
+              playlists: {
+                select: { name: true }
+              }
             }
-          },
-          playlists: {
-            select: {
-              name: true
-            },
           }
         }
       },
@@ -48,13 +62,15 @@ export default async function page({ params: { id } }: { params: { id: string } 
         select: {
           name: true
         }
-      }
+      },
     }
   })
 
   if (!playlistSongs) {
     notFound()
   }
+
+  // console.log(playlistSongs.playlistSongs)
 
   const isInLibrary = await prisma.library.findFirst({
     where: {
@@ -99,7 +115,7 @@ export default async function page({ params: { id } }: { params: { id: string } 
   return (
     <div>
       <PlaylistContainer
-        playlistSongs={playlistSongs}
+        playlist={playlistSongs}
         active={session.active}
         category={playlistSongs?.category}
         currUserId={session.userId}

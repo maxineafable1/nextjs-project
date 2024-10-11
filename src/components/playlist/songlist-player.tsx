@@ -11,6 +11,8 @@ import UnauthModal from '../reusables/unauth-modal'
 import DeleteModal from '../reusables/delete-modal'
 import { IoIosAddCircleOutline } from 'react-icons/io'
 // import HoverPlayButton from '../hover-play-btn'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import dayjs from 'dayjs'
 
 type SonglistPlayerProps = {
   song: SampleTypeForPlaylist
@@ -35,6 +37,13 @@ type SonglistPlayerProps = {
     name: string;
     songIds: string[];
   }[]
+
+  songAddedAt?: Date
+  playlistSongId?: string
+
+  playlistSongIds?: {
+    id: string;
+  }[]
 }
 
 export default function SonglistPlayer({
@@ -55,6 +64,9 @@ export default function SonglistPlayer({
   likedSongIds,
   playlistName,
   userPlaylists,
+  songAddedAt,
+  playlistSongId,
+  playlistSongIds,
 }: SonglistPlayerProps) {
   const [isHover, setIsHover] = useState(false)
 
@@ -65,7 +77,7 @@ export default function SonglistPlayer({
 
   const { id: playlistId } = useParams()
 
-  const deleteSongWithId = deleteSong.bind(null, song.id)
+  const deleteSongWithId = deleteSong.bind(null, song.id, playlistSongIds!)
 
   function numToTime(value: number) {
     const minutes = Math.floor(value / 60)
@@ -81,6 +93,8 @@ export default function SonglistPlayer({
   }, [isOpen])
 
   const saveToLikedSongsWithId = saveToLikedSongs.bind(null, song.id)
+
+  dayjs.extend(relativeTime)
 
   return (
     <li
@@ -161,19 +175,26 @@ export default function SonglistPlayer({
               </div>
             </div>
             {category === 'Playlist' && (
-              <div
-                className={`
+              <>
+                <div
+                  className={`
                  text-neutral-400 text-sm
                   ${isHover && 'text-white'} mx-auto flex-1
                 `}
-              >
-                <Link
-                  href={`/album/${song.playlistIds.at(0)}`}
-                  className="hover:underline"
                 >
-                  {albumName}
-                </Link>
-              </div>
+                  <Link
+                    href={`/album/${song.playlistIds.at(0)}`}
+                    className="hover:underline"
+                  >
+                    {albumName}
+                  </Link>
+                </div>
+                {validUser && (
+                  <div className='text-sm text-neutral-400 flex-1'>
+                    {dayjs(songAddedAt).fromNow()}
+                  </div>
+                )}
+              </>
             )}
           </>
         ) : (
@@ -183,21 +204,23 @@ export default function SonglistPlayer({
                 {song.title}
               </span>
             </div>
-            {category === 'Playlist' && (
-              <>
-                <div
-                  className={`
+            {category !== 'Artist' && (
+              <div
+                className={`
                 text-neutral-400 text-sm block
                   ${isHover && 'text-white'} mx-auto flex-1
                 `}
+              >
+                <Link
+                  href={`/artist/${song.artistId}`}
+                  className='hover:underline'
                 >
-                  <Link
-                    href={`/artist/${song.artistId}`}
-                    className='hover:underline'
-                  >
-                    {song.artist.name}
-                  </Link>
-                </div>
+                  {song.artist.name}
+                </Link>
+              </div>
+            )}
+            {category === 'Playlist' && (
+              <>
                 <div
                   className={`
                 text-neutral-400 text-sm block
@@ -217,14 +240,19 @@ export default function SonglistPlayer({
         )}
         {isHover && (
           <form
-            action={likedSongIds?.includes(song.id) ? '' : saveToLikedSongsWithId}
+            action={(active && likedSongIds?.includes(song.id)) ? '' : saveToLikedSongsWithId}
             className='absolute right-10 grid'
+            onClick={() => {
+              if (!active) {
+                alert('login pls')
+              }
+            }}
           >
             <button
-              title={`${likedSongIds?.includes(song.id) ? 'Remove from Liked Songs' : 'Add to Liked Songs'}`}
+              title={`${(active && likedSongIds?.includes(song.id)) ? 'Remove from Liked Songs' : 'Add to Liked Songs'}`}
               className={`hover:scale-110 justify-self-center`}
             >
-              {likedSongIds?.includes(song.id) ? (
+              {(active && likedSongIds?.includes(song.id)) ? (
                 <FaCheck
                   className={`bg-green-500 text-black p-1 rounded-full `}
                 />
@@ -263,6 +291,7 @@ export default function SonglistPlayer({
             likedSongIds={likedSongIds}
             playlistName={playlistName}
             userPlaylists={userPlaylists}
+            playlistSongId={playlistSongId}
           />
         )}
       </div>

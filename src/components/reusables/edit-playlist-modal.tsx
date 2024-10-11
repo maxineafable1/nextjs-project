@@ -8,6 +8,7 @@ import { IoClose } from "react-icons/io5"
 import Image from "next/image"
 import { MdEdit } from "react-icons/md"
 import { FaMusic } from "react-icons/fa"
+import InputForm from "../input-form"
 
 type EditPlaylistModalProps = {
   dialogRef: RefObject<HTMLDialogElement>
@@ -28,14 +29,16 @@ export default function EditPlaylistModal({
   category,
 }: EditPlaylistModalProps) {
   const [isEditPhoto, setIsEditPhoto] = useState(false)
-  const [photoValue, setPhotoValue] = useState<File | null>(null)
+  // const [photoValue, setPhotoValue] = useState<File | null>(null)
 
-  const { register, formState: { errors }, handleSubmit } = useForm<PlaylistDetailData>({
+  const { register, formState: { errors }, handleSubmit, watch } = useForm<PlaylistDetailData>({
     mode: 'all',
     resolver: zodResolver(PlaylistDetailSchema)
   })
 
-  const { onChange, name: registerName, ref } = register('image')
+  const photoValue = watch('image', null)
+
+  // const { onChange, name: registerName, ref } = register('image')
 
   const onSubmit: SubmitHandler<PlaylistDetailData> = async (data) => {
     try {
@@ -102,12 +105,12 @@ export default function EditPlaylistModal({
             onMouseEnter={() => setIsEditPhoto(true)}
             onMouseLeave={() => setIsEditPhoto(false)}
           >
-            {photoValue ? (
+            {photoValue?.length > 0 ? (
               <div className="relative">
                 {isEditPhoto ? (
                   <>
                     <Image
-                      src={URL.createObjectURL(photoValue)}
+                      src={URL.createObjectURL(photoValue?.[0])}
                       alt=""
                       width={500}
                       height={500}
@@ -123,7 +126,7 @@ export default function EditPlaylistModal({
                   </>
                 ) : (
                   <Image
-                    src={URL.createObjectURL(photoValue)}
+                    src={URL.createObjectURL(photoValue?.[0])}
                     alt=""
                     width={500}
                     height={500}
@@ -179,27 +182,29 @@ export default function EditPlaylistModal({
           </label>
           <input
             type="file"
-            id="file"
-            ref={ref}
-            name={registerName}
             accept="image/*"
-            onChange={e => {
-              const file = e.target.files?.[0]
-              if (file) {
-                setPhotoValue(file)
-              }
-              onChange(e)
-            }}
+            id="file"
+            {...register('image')}
+            className={`sr-only invisible`}
           />
           <div className="flex flex-col justify-between gap-1">
             <div className="grid gap-1">
               <label htmlFor="name" className="font-semibold text-sm">{category} Name</label>
-              <input
+              {/* <input
                 type="text"
                 id="name"
                 defaultValue={playlistName!}
                 {...register('name')}
                 className="px-3 py-2 rounded bg-neutral-700"
+                autoFocus
+              /> */}
+              <InputForm 
+                register={register}
+                name="name"
+                id="name"
+                defaultValue={playlistName!}
+                error={errors.name?.message}
+                autoFocus
               />
             </div>
             <button

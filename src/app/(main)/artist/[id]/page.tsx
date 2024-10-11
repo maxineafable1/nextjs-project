@@ -41,9 +41,12 @@ export default async function page({ params: { id } }: { params: { id: string } 
             select: {
               name: true
             },
+          },
+          playlistSongs: {
+            select: { id: true }
           }
         }
-      }
+      },
     }
   })
 
@@ -77,6 +80,10 @@ export default async function page({ params: { id } }: { params: { id: string } 
           name: { equals: 'Liked Songs' }
         }
       ]
+    },
+    select: {
+      songIds: true,
+      playlistSongs: { select: { id: true, songId: true } }
     }
   })
 
@@ -109,7 +116,7 @@ export default async function page({ params: { id } }: { params: { id: string } 
         currUserId={session.userId}
       />
       <ArtistSongCard
-        songs={artistSongs?.Song}
+        songs={artistSongs.Song}
         active={session.active}
         image={artistSongs?.image}
         urlId={id}
@@ -117,6 +124,7 @@ export default async function page({ params: { id } }: { params: { id: string } 
         name={artistSongs?.name}
         artistPlaylist={artistPlaylist}
         likedSongIds={likedSongs?.songIds}
+        likedPlaylistSongIds={likedSongs?.playlistSongs}
       />
       {artistAlbums.length > 0 && (
         <div className="mt-8">

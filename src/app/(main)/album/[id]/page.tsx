@@ -31,17 +31,31 @@ export default async function page({ params: { id } }: { params: { id: string } 
       category: { equals: 'Album' },
     },
     include: {
-      songs: {
+      // songs: {
+      //   include: {
+      //     artist: {
+      //       select: {
+      //         name: true
+      //       }
+      //     },
+      //     playlists: {
+      //       select: {
+      //         name: true
+      //       },
+      //     }
+      //   }
+      // },
+      playlistSongs: {
         include: {
-          artist: {
-            select: {
-              name: true
+          song: {
+            include: {
+              artist: {
+                select: { name: true }
+              },
+              playlists: {
+                select: { name: true }
+              }
             }
-          },
-          playlists: {
-            select: {
-              name: true
-            },
           }
         }
       },
@@ -78,15 +92,35 @@ export default async function page({ params: { id } }: { params: { id: string } 
     }
   })
 
+  const userPlaylists = await prisma.playlist.findMany({
+    where: {
+      userId: session.userId,
+      AND: [
+        {
+          NOT: {
+            name: { equals: 'Liked Songs' }
+          },
+          category: 'Playlist',
+        }
+      ]
+    },
+    select: {
+      id: true,
+      name: true,
+      songIds: true,
+    }
+  })
+
   return (
     <div>
       <PlaylistContainer
-        playlistSongs={albumSongs}
+        playlist={albumSongs}
         active={session.active}
         category={albumSongs?.category}
         currUserId={session.userId}
         isInLibrary={isInLibrary}
         likedSongIds={likedSongs?.songIds}
+        userPlaylists={userPlaylists}
       />
       {(session.active && albumSongs?.userId === session.userId) && (
         <PlaylistForm category={albumSongs.category} />

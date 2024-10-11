@@ -98,7 +98,14 @@ export async function createPlaylist() {
   const playlistCount = await prisma.playlist.count({
     where: {
       userId: session.userId,
-      category: { equals: 'Playlist' }
+      AND: [
+        {
+          category: { equals: 'Playlist' },
+          NOT: {
+            name: { equals: 'Liked Songs' }
+          }
+        }
+      ]
     }
   })
 
@@ -168,7 +175,14 @@ export async function updatePlaylist(playlistId: string, songId: string) {
     data: {
       songIds: {
         push: songId
-      }
+      },
+    }
+  })
+
+  await prisma.playlistSong.create({
+    data: {
+      playlistId,
+      songId,
     }
   })
 
@@ -232,27 +246,39 @@ export async function deletePlaylist(playlistId: string) {
 
   if (!exists) return
 
-  await s3Client.send(
-    new DeleteObjectCommand({
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
-      Key: `images/${exists.image}`,
-    })
-  )
+  if (exists.image) {
+    await s3Client.send(
+      new DeleteObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: `images/${exists.image}`,
+      })
+    )
+  }
 
   const libraryPlaylist = await prisma.library.findFirst({
     where: {
       userId: session.userId,
       playlistIds: { has: playlistId }
+    },
+    select: {
+      playlistIds: true
     }
   })
 
-  // remove from library when playlist is deleted
+  // remove the playlist from library
   await prisma.library.update({
     where: {
       userId: session.userId,
     },
     data: {
       playlistIds: libraryPlaylist?.playlistIds.filter(playlist => playlist !== playlistId)
+    }
+  })
+
+  // to delete all instance of songs in this playlist
+  await prisma.playlistSong.deleteMany({
+    where: {
+      playlistId
     }
   })
 
@@ -266,7 +292,7 @@ export async function deletePlaylist(playlistId: string) {
   redirect('/')
 }
 
-export async function deleteSongFromPlaylist(playlistId: string, songId: string) {
+export async function deleteSongFromPlaylist(playlistId: string, songId: string, playlistSongId: string) {
   const exists = await prisma.playlist.findUnique({
     where: {
       id: playlistId
@@ -289,6 +315,13 @@ export async function deleteSongFromPlaylist(playlistId: string, songId: string)
     }
   })
 
+  await prisma.playlistSong.delete({
+    where: {
+      playlistId,
+      id: playlistSongId
+    }
+  })
+
   if (playlist.category === 'Album') {
     await prisma.song.update({
       where: {
@@ -303,7 +336,7 @@ export async function deleteSongFromPlaylist(playlistId: string, songId: string)
   revalidatePath(`/playlist/${playlist.id}`)
 }
 
-export async function deleteSong(songId: string) {
+export async function deleteSong(songId: string, playlistSongsIds: { id: string; }[]) {
   const session = await getSession()
 
   const exists = await prisma.song.findUnique({
@@ -325,6 +358,14 @@ export async function deleteSong(songId: string) {
       Key: `songs/${exists.song}`,
     })
   )
+
+  if (playlistSongsIds.length > 0) {
+    await prisma.playlistSong.deleteMany({
+      where: {
+        id: { in: playlistSongsIds.map(p => p.id) }
+      }
+    })
+  }
 
   await prisma.song.delete({
     where: {
@@ -440,10 +481,17 @@ export async function saveToLikedSongs(songId: string) {
     }
   })
 
+  await prisma.playlistSong.create({
+    data: {
+      playlistId: likedSongsId.id,
+      songId,
+    }
+  })
+
   revalidatePath(`/playlist/${likedSongs.id}`)
 }
 
-export async function removeFromLikedSongs(songId: string) {
+export async function removeFromLikedSongs(songId: string, playlistSongId: string) {
   const session = await getSession()
   const exists = await prisma.playlist.findFirst({
     where: {
@@ -473,6 +521,13 @@ export async function removeFromLikedSongs(songId: string) {
     }
   })
 
+  await prisma.playlistSong.delete({
+    where: {
+      id: playlistSongId,
+      playlistId: playlist.id,
+    }
+  })
+
   revalidatePath(`/playlist/${playlist.id}`)
 }
 
@@ -495,6 +550,14 @@ export async function createPlaylistWithSong(songId: string) {
     }
   })
 
+  await prisma.playlistSong.create({
+    data: {
+      playlistId: playlist.id,
+      songId,
+    }
+  })
+
+  // automatically add playlist to library
   await prisma.library.update({
     where: {
       userId: session.userId,

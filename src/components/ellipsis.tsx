@@ -63,7 +63,7 @@ export default function Ellipsis({
     <div className="relative">
       <button
         onClick={() => setIsCreate(true)}
-        className="text-neutral-400 hover:text-white hover:scale-105"
+        className="text-neutral-400 grid hover:text-white hover:scale-105"
       >
         <FaEllipsis fontSize='1.5rem' />
       </button>

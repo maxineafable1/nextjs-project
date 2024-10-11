@@ -8,6 +8,9 @@ import Image from 'next/image'
 import { IoClose } from 'react-icons/io5'
 import { MdEdit } from 'react-icons/md'
 import { FaMusic } from 'react-icons/fa'
+import InputForm from '../input-form'
+import ErrorMessage from '../error-message'
+import { IoIosInformationCircleOutline } from 'react-icons/io'
 
 type CreateAlbumModalProps = {
   dialogRef: RefObject<HTMLDialogElement>
@@ -21,14 +24,16 @@ export default function CreateAlbumModal({
   setIsOpen,
 }: CreateAlbumModalProps) {
   const [isEditPhoto, setIsEditPhoto] = useState(false)
-  const [photoValue, setPhotoValue] = useState<File | null>(null)
+  // const [photoValue, setPhotoValue] = useState<File | null>(null)
 
-  const { register, formState: { errors }, handleSubmit } = useForm<PlaylistDetailData>({
-    mode: 'all',
+  const { register, formState: { errors }, handleSubmit, watch } = useForm<PlaylistDetailData>({
+    mode: 'onChange',
     resolver: zodResolver(PlaylistDetailSchema)
   })
 
-  const { onChange, name: registerName, ref } = register('image')
+  const photoValue = watch('image', null)
+
+  // const { onChange, name: registerName, ref } = register('image')
 
   const onSubmit: SubmitHandler<PlaylistDetailData> = async (data) => {
     try {
@@ -72,8 +77,8 @@ export default function CreateAlbumModal({
           </button>
         </div>
         {(errors.name?.message || errors.image?.message) && (
-          <p className="bg-red-400 text-sm rounded px-2 py-1 mb-2">
-            {errors.name?.message || errors.image?.message?.toString()}
+          <p className="bg-red-400 text-sm rounded px-2 py-1 mb-2 flex items-center gap-1">
+            <IoIosInformationCircleOutline fontSize='1.25rem' /> {errors.name?.message || errors.image?.message?.toString()}
           </p>
         )}
         <form
@@ -91,12 +96,12 @@ export default function CreateAlbumModal({
             onMouseEnter={() => setIsEditPhoto(true)}
             onMouseLeave={() => setIsEditPhoto(false)}
           >
-            {photoValue ? (
+            {photoValue?.length > 0 ? (
               <div className="relative">
                 {isEditPhoto ? (
                   <>
                     <Image
-                      src={URL.createObjectURL(photoValue)}
+                      src={URL.createObjectURL(photoValue?.[0])}
                       alt=""
                       width={500}
                       height={500}
@@ -112,7 +117,7 @@ export default function CreateAlbumModal({
                   </>
                 ) : (
                   <Image
-                    src={URL.createObjectURL(photoValue)}
+                    src={URL.createObjectURL(photoValue?.[0])}
                     alt=""
                     width={500}
                     height={500}
@@ -135,26 +140,20 @@ export default function CreateAlbumModal({
           </label>
           <input
             type="file"
-            id="file"
-            ref={ref}
-            name={registerName}
             accept="image/*"
-            onChange={e => {
-              const file = e.target.files?.[0]
-              if (file) {
-                setPhotoValue(file)
-              }
-              onChange(e)
-            }}
+            id="file"
+            {...register('image')}
+            className={`sr-only invisible`}
           />
           <div className="flex flex-col justify-between gap-1">
             <div className="grid gap-1">
               <label htmlFor="name" className="font-semibold text-sm">Album Name</label>
-              <input
-                type="text"
-                id="name"
-                {...register('name')}
-                className="px-3 py-2 rounded bg-neutral-700"
+              <InputForm
+                register={register}
+                name='name'
+                id='name'
+                error={errors.name?.message}
+                autoFocus
               />
             </div>
             <button

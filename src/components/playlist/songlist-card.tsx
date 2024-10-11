@@ -18,7 +18,17 @@ import { useParams } from "next/navigation"
 import { FaCheck } from "react-icons/fa6";
 
 type SonglistCardProps = {
-  songs: SampleTypeForPlaylist[] | undefined
+  // songs: SampleTypeForPlaylist[] | undefined
+  playlistSongs: {
+    id: string;
+    songId: string;
+    playlistId: string;
+    addedAt: Date;
+    song: SampleTypeForPlaylist
+  }[]
+
+
+
   active: boolean
   setTotalDuration: React.Dispatch<React.SetStateAction<number | undefined>>
   image: string | null | undefined
@@ -37,7 +47,7 @@ type SonglistCardProps = {
 }
 
 export default function SonglistCard({
-  songs,
+  playlistSongs,
   active,
   setTotalDuration,
   image,
@@ -67,7 +77,7 @@ export default function SonglistCard({
       setTotalDuration(list.filter(l => l != null).reduce((a, b) => a! + b!, 0))
     }
 
-  }, [songs?.length])
+  }, [playlistSongs?.length])
 
   const validUser = active && currUserId === playlistUserId
 
@@ -77,16 +87,18 @@ export default function SonglistCard({
 
   return (
     <>
-      {songs?.length !== 0 && (
+      {playlistSongs?.length !== 0 && (
         <>
           <div className="flex items-center gap-6 my-4">
             <button
               onClick={e => {
-                if (!songs) return
-                const random = Math.floor(Math.random() * songs?.length)
+                if (!playlistSongs) return
+                const random = Math.floor(Math.random() * playlistSongs?.length)
                 if (active) {
-                  setCurrentSong(songs[random])
-                  setCurrentAlbum(songs)
+                  // setCurrentSong(songs[random])
+                  setCurrentSong(playlistSongs[random].song)
+                  // setCurrentAlbum(songs)
+                  setCurrentAlbum(playlistSongs.map(s => s.song))
                 } else {
                   setIsOpen(true)
                 }
@@ -97,17 +109,23 @@ export default function SonglistCard({
             </button>
             {!validUser && (
               <form
-                action={isInLibrary ? deleteFromLibraryWithId : addOtherUserPlaylistWithId}
+                action={(active && isInLibrary) ? deleteFromLibraryWithId : addOtherUserPlaylistWithId}
+                className="grid"
               >
                 <button
                   className={`
                     text-neutral-400 hover:text-white hover:scale-105
-                    ${isInLibrary && 'bg-green-500 p-2 rounded-full'}
+                    ${(active && isInLibrary) && 'bg-green-500 p-2 rounded-full'}
                   `}
+                  onClick={() => {
+                    if (!active) {
+                      alert('login pls')
+                    }
+                  }}
                 >
-                  {isInLibrary ? (
+                  {(active && isInLibrary) ? (
                     <FaCheck
-                      title={isInLibrary ? 'Remove from Your Library' : 'Add to Your Library'}
+                      title={(active && isInLibrary) ? 'Remove from Your Library' : 'Add to Your Library'}
                       // fontSize='1.5rem'
                       className={`text-black`}
                     />
@@ -136,7 +154,8 @@ export default function SonglistCard({
           {isOpen && (
             <UnauthModal
               dialogRef={dialogRef}
-              firstSongImage={songs?.at(0)?.image}
+              // firstSongImage={songs?.at(0)?.image}
+              firstSongImage={playlistSongs.at(0)?.song.image}
               isArtistIcon={false}
               playlistImage={image}
               setIsOpen={setIsOpen}
@@ -153,7 +172,12 @@ export default function SonglistCard({
                     <p className="flex-1">Album</p>
                   </>
                 ) : (
-                  <p className="flex-1">Album</p>
+                  <>
+                    <p className="flex-1">Album</p>
+                    {validUser && (
+                      <p className="flex-1">Date added</p>
+                    )}
+                  </>
                 )}
               </>
               // <p className="mx-auto flex-1">{viewAs === 'List' ? 'Album' : 'Artist'}</p>
@@ -168,36 +192,43 @@ export default function SonglistCard({
         </>
       )}
       <ul>
-        {songs?.map((song, index) => (
+        {playlistSongs?.map((playlistSong, index) => (
           <SonglistPlayer
-            key={song.id}
-            song={song}
+            key={playlistSong.id}
+            song={playlistSong.song}
             index={index}
             audioRef={audioRef}
             setDurations={setDurations}
             durations={durations}
             onClick={() => {
-              if (!songs) return
+              if (!playlistSongs) return
               if (active) {
-                setCurrentSong(songs[index])
-                setCurrentAlbum(songs)
+                // setCurrentSong(songs[random])
+                setCurrentSong(playlistSongs[index].song)
+                // setCurrentAlbum(songs)
+                setCurrentAlbum(playlistSongs.map(s => s.song))
               }
             }}
             setTotalDuration={setTotalDuration}
             active={active}
             viewAs={viewAs}
             artistPage={false}
-            albumName={song.playlists?.at(0)?.name}
-            albumId={song.playlistIds.at(0)}
+            // albumName={song.playlists?.at(0)?.name}
+            // albumId={song.playlistIds.at(0)}
+            albumName={playlistSong.song.playlists?.at(0)?.name}
+            albumId={playlistSong.song.playlistIds.at(0)}
             category={category}
             validUser={validUser}
             likedSongIds={likedSongIds}
             playlistName={playlistName}
             userPlaylists={userPlaylists}
+
+            songAddedAt={playlistSong.addedAt}
+            playlistSongId={playlistSong.id}
           />
         ))}
       </ul>
-      {songs?.length !== 0 && <div className="bg-neutral-700 h-px w-full my-2"></div>}
+      {playlistSongs?.length !== 0 && <div className="bg-neutral-700 h-px w-full my-2"></div>}
     </>
   )
 }

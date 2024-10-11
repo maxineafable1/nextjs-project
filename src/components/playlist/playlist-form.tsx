@@ -40,6 +40,7 @@ export default function PlaylistForm({ category }: PlaylistFormProps) {
       <button
         className={`
           mt-4 font-semibold self-end text-sm
+          text-neutral-400 hover:text-white hover:underline
           ${isFindMore ? 'hidden' : 'block'}
         `}
         onClick={() => setIsFindMore(true)}

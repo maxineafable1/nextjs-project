@@ -13,7 +13,14 @@ import UnauthModal from "../reusables/unauth-modal";
 import Ellipsis from "../ellipsis";
 
 type ArtistSongCardProps = {
-  songs: SampleTypeForPlaylist[] | undefined
+  songs: (SampleTypeForPlaylist
+    & {
+      playlistSongs: {
+        id: string;
+      }[];
+    }
+  )[]
+
   active: boolean
   image: string | null | undefined
   urlId: string
@@ -25,7 +32,12 @@ type ArtistSongCardProps = {
     id: string;
     name: string;
     songIds: string[];
-}[]
+  }[]
+
+  likedPlaylistSongIds: {
+    id: string;
+    songId: string;
+  }[] | undefined
 }
 
 export default function ArtistSongCard({
@@ -37,7 +49,7 @@ export default function ArtistSongCard({
   name,
   artistPlaylist,
   likedSongIds,
-
+  likedPlaylistSongIds,
 }: ArtistSongCardProps) {
   const { setCurrentSong, setCurrentAlbum } = useSongContext()
   const { dialogRef, isOpen, setIsOpen } = useModal()
@@ -65,7 +77,7 @@ export default function ArtistSongCard({
     <>
       {songs?.length !== 0 && (
         <>
-          <div className="flex items-center gap-4 my-4">
+          <div className="flex items-center gap-6 my-4">
             <button
               onClick={e => {
                 if (!songs) return
@@ -125,9 +137,11 @@ export default function ArtistSongCard({
                 artistPage={true}
                 category="Artist"
                 validUser={validUser}
-                
+
                 likedSongIds={likedSongIds}
                 userPlaylists={artistPlaylist}
+                playlistSongIds={song.playlistSongs}
+                playlistSongId={likedPlaylistSongIds?.find(lp => lp.songId === song.id)?.id}
               />
             ))}
           </ul>

@@ -8,6 +8,7 @@ import Image from 'next/image'
 import { IoClose } from 'react-icons/io5'
 import { MdEdit } from 'react-icons/md'
 import { FaUser } from 'react-icons/fa'
+import InputForm from '../input-form'
 
 type EditArtistModalProps = {
   dialogRef: React.RefObject<HTMLDialogElement>
@@ -27,12 +28,14 @@ export default function EditArtistModal({
   name,
 }: EditArtistModalProps) {
   const [isEditPhoto, setIsEditPhoto] = useState(false)
-  const [photoValue, setPhotoValue] = useState<File | null>(null)
+  // const [photoValue, setPhotoValue] = useState<File | null>(null)
 
-  const { register, formState: { errors }, handleSubmit } = useForm<ArtistInfoData>({
+  const { register, formState: { errors }, handleSubmit, watch } = useForm<ArtistInfoData>({
     mode: 'all',
     resolver: zodResolver(ArtistInfoSchema)
   })
+
+  const photoValue = watch('image', null)
 
   const { onChange, name: registerName, ref } = register('image')
 
@@ -59,7 +62,7 @@ export default function EditArtistModal({
         console.log(updateRes)
       }
 
-      setIsOpen(false)  
+      setIsOpen(false)
     } catch (error) {
       console.log(error)
     }
@@ -107,12 +110,12 @@ export default function EditArtistModal({
             onMouseEnter={() => setIsEditPhoto(true)}
             onMouseLeave={() => setIsEditPhoto(false)}
           >
-            {photoValue ? (
+            {photoValue?.length > 0 ? (
               <div className="relative">
                 {isEditPhoto ? (
                   <>
                     <Image
-                      src={URL.createObjectURL(photoValue)}
+                      src={URL.createObjectURL(photoValue?.[0])}
                       alt=""
                       width={500}
                       height={500}
@@ -128,7 +131,7 @@ export default function EditArtistModal({
                   </>
                 ) : (
                   <Image
-                    src={URL.createObjectURL(photoValue)}
+                    src={URL.createObjectURL(photoValue?.[0])}
                     alt=""
                     width={500}
                     height={500}
@@ -182,7 +185,7 @@ export default function EditArtistModal({
               </>
             )}
           </label>
-          <input
+          {/* <input
             type="file"
             id="file"
             ref={ref}
@@ -195,16 +198,31 @@ export default function EditArtistModal({
               }
               onChange(e)
             }}
+          /> */}
+          <input
+            type="file"
+            accept="image/*"
+            id="file"
+            {...register('image')}
+            className={`sr-only invisible`}
           />
           <div className="flex flex-col justify-between gap-1">
             <div className="grid gap-1">
               <label htmlFor="name" className="font-semibold text-sm">Artist Name</label>
-              <input
+              {/* <input
                 type="text"
                 id="name"
                 defaultValue={name!}
                 {...register('name')}
                 className="px-3 py-2 rounded bg-neutral-700"
+              /> */}
+              <InputForm
+                register={register}
+                name="name"
+                id="name"
+                defaultValue={name!}
+                error={errors.name?.message}
+                autoFocus
               />
             </div>
             <button

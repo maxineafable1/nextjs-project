@@ -44,7 +44,7 @@ export default function ListCompact({ viewAs, setViewAs }: ListCompactProps) {
         ref={btnRef}
         className={`
           flex items-center gap-3 text-neutral-400 hover:text-white
-          font-medium text-sm
+          font-medium text-sm 
         `}
         onClick={() => setIsOpen(true)}
       >

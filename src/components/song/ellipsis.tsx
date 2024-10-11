@@ -29,6 +29,8 @@ type SongEllipsisProps = {
     name: string;
     songIds: string[];
   }[]
+
+  playlistSongId: string | undefined
 }
 
 export default function SongEllipsis({
@@ -46,16 +48,18 @@ export default function SongEllipsis({
   likedSongIds,
   playlistName,
   userPlaylists,
+  playlistSongId,
 }: SongEllipsisProps) {
   const [isInnerHover, setIsInnerHover] = useState(false)
   const { dialogRef, isOpen, setIsOpen } = useModal()
+  const [searchValue, setSearchValue] = useState('')
 
   const divRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
 
   const playlistRef = useRef<HTMLDivElement>(null)
 
-  const deleteSongFromPlaylistWithId = deleteSongFromPlaylist.bind(null, playlistId as string, songId)
+  const deleteSongFromPlaylistWithId = deleteSongFromPlaylist.bind(null, playlistId as string, songId, playlistSongId as string)
 
   useEffect(() => {
     // wag alisin itong return para makapag play ng music
@@ -76,7 +80,7 @@ export default function SongEllipsis({
   }, [isCreate])
 
   const saveToLikedSongsWithId = saveToLikedSongs.bind(null, songId)
-  const removeFromLikedSongsWithId = removeFromLikedSongs.bind(null, songId)
+  const removeFromLikedSongsWithId = removeFromLikedSongs.bind(null, songId, playlistSongId as string)
 
   const createPlaylistWithSongWithId = createPlaylistWithSong.bind(null, songId)
 
@@ -94,8 +98,8 @@ export default function SongEllipsis({
       <div
         ref={divRef}
         className={`
-          absolute bg-neutral-800 rounded shadow w-max p-1
-          ${!isCreate && 'hidden'} text-sm right-0
+          absolute bg-neutral-800 rounded shadow  ${!likedSongIds?.includes(songId) ? 'w-56' : 'w-64'} p-1
+          ${!isCreate && 'hidden'} text-sm right-0 z-10
         `}
       >
         <div className="relative">
@@ -103,30 +107,36 @@ export default function SongEllipsis({
             <div
               ref={playlistRef}
               className={`
-                absolute -left-full translate-x-2 bg-neutral-800  
-                z-20 rounded p-1.5 max-h-36 overflow-y-auto
+                absolute -left-full ${likedSongIds?.includes(songId) && 'translate-x-8'}  bg-neutral-800  
+                z-20 rounded p-1.5 ${validUser && 'min-h-36'} max-h-36 overflow-y-auto
               `}
               onMouseEnter={() => setIsInnerHover(true)}
             >
-              <form
+              <div
                 className="relative bg-neutral-700 mb-1"
               >
                 <CiSearch className="absolute text-xl left-2 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
+                  onChange={e => setSearchValue(e.target.value)}
                   className={`
-                border-none bg-neutral-700 rounded placeholder:text-sm 
-                placeholder:text-neutral-400 outline-none py-1 pl-8
-                text-sm
-              `}
+                    border-none bg-neutral-700 rounded placeholder:text-sm 
+                    placeholder:text-neutral-400 outline-none py-1 pl-8
+                    text-sm
+                  `}
                   placeholder="Find a playlist"
                 />
-              </form>
+              </div>
               <form
-                action={createPlaylistWithSongWithId}
-                onSubmit={() => {
-                  setIsInnerHover(false)
-                  setIsCreate(false)
+                action={validUser ? createPlaylistWithSongWithId : ''}
+                onSubmit={e => {
+                  if (validUser) {
+                    setIsInnerHover(false)
+                    setIsCreate(false)
+                  } else {
+                    e.preventDefault()
+                    alert('login pls')
+                  }
                 }}
               >
                 <button
@@ -136,33 +146,43 @@ export default function SongEllipsis({
                 </button>
               </form>
               <div className="h-px w-full bg-neutral-700"></div>
-              <ul>
-                {userPlaylists?.map(playlist => (
-                  <Fragment key={playlist.id}>
-                    <li
-                      onClick={() => {
-                        if (playlist.songIds.includes(songId)) {
-                          setIsOpen(true)
-                        } else {
-                          const updatePlaylistWithId = updatePlaylist.bind(null, playlist.id, songId)
-                          updatePlaylistWithId()
-                        }
-                      }}
-                      className="text-start p-2 text-sm hover:bg-neutral-600 cursor-pointer"
-                    >
-                      {playlist.name}
-                    </li>
-                    {isOpen && (
-                      <AddToPlaylistModal
-                        dialogRef={dialogRef}
-                        setIsOpen={setIsOpen}
-                        playlistName={playlist.name}
-                        clickedPlaylistId={playlist.id}
-                      />
-                    )}
-                  </Fragment>
-                ))}
-              </ul>
+              {validUser && (
+                <ul>
+                  {userPlaylists
+                    .filter(p => p.name.toLowerCase().includes(searchValue.toLowerCase()))
+                    ?.map(playlist => (
+                      <Fragment key={playlist.id}>
+                        <li
+                          onClick={() => {
+                            if (playlist.songIds.includes(songId)) {
+                              setIsOpen(true)
+                            } else {
+                              const updatePlaylistWithId = updatePlaylist.bind(null, playlist.id, songId)
+                              updatePlaylistWithId()
+                            }
+                          }}
+                          className={`
+                        text-start p-2 text-sm hover:bg-neutral-600 cursor-pointer
+                      `}
+                        >
+                          {playlist.name.split('').map((letter, i) => (
+                            <span className={`${searchValue.toLowerCase().includes(letter.toLowerCase()) && 'bg-blue-400 rounded-full'}`}>
+                              {letter}
+                            </span>
+                          ))}
+                        </li>
+                        {isOpen && (
+                          <AddToPlaylistModal
+                            dialogRef={dialogRef}
+                            setIsOpen={setIsOpen}
+                            playlistName={playlist.name}
+                            clickedPlaylistId={playlist.id}
+                          />
+                        )}
+                      </Fragment>
+                    ))}
+                </ul>
+              )}
             </div>
           )}
         </div>

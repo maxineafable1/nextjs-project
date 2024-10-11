@@ -58,62 +58,81 @@ export default function SearchForm({
 
   return (
     <>
-      <div>
-        <div className="flex items-center justify-between">
-          <div className="grid gap-1 mt-4 max-w-sm">
-            <label
-              htmlFor="search"
-              className="text-xl font-bold"
-            >
-              Let's find something for your playlist</label>
-            <input
-              type="search"
-              name="search"
-              id="search"
-              value={value}
-              onChange={e => {
-                setValue(e.target.value)
-              }}
-              placeholder="Search for songs"
-              className="px-3 py-2 rounded bg-inherit border border-white "
-            />
-          </div>
-          <button onClick={() => setIsFindMore(false)}>
-            <IoClose fontSize='2rem' />
-          </button>
-        </div>
-      </div>
-      <ul className="mt-8">
-        {songs?.map(song => (
-          <li
-            key={song.id}
-            className="flex items-center gap-2 hover:bg-neutral-800 p-2 rounded"
+      <div className="flex items-center justify-between">
+        <div className="grid gap-2 mt-4 max-w-sm">
+          <label
+            htmlFor="search"
+            className="text-xl font-bold"
           >
-            <Image
-              src={`${process.env.BASE_URL}/${song.image}`}
-              alt=""
-              width={500}
-              height={500}
-              className="aspect-square max-w-10 object-cover block rounded-md"
-            />
-            <div>
-              <p>{song.title}</p>
-              <p className="text-neutral-400 text-sm">{song.artist.name}</p>
-            </div>
-            <form className="ml-auto" onSubmit={handleSubmit(onSubmit)}>
-              <button
-                className="rounded-full border border-neutral-400 hover:border-white hover:scale-105 font-semibold px-3 py-1"
-                ref={ref}
-                onClick={() => {
-                  setPlaylistSong('song', song.id)
-                }}
-              >
-                Add
-              </button>
-            </form>
-          </li>
-        ))}
-      </ul>
+            Let's find something for your playlist
+          </label>
+          <input
+            type="search"
+            name="search"
+            id="search"
+            value={value}
+            onChange={e => {
+              setValue(e.target.value)
+            }}
+            placeholder="Search for songs"
+            className={`
+              px-3 py-2 rounded bg-inherit 
+              border border-neutral-400 hover:border-white
+              focus-visible:outline focus-visible:border-transparent
+              outline-white
+            `}
+            autoFocus
+          />
+        </div>
+        <button
+          onClick={() => setIsFindMore(false)}
+          className="focus-visible:outline outline-white"
+        >
+          <IoClose
+            fontSize='2rem'
+            className="fill-neutral-400 hover:fill-white"
+          />
+        </button>
+      </div>
+      {songs.length > 0 ? (
+        <ul className="mt-8">
+          {songs.map(song => (
+            <li
+              key={song.id}
+              className="flex items-center gap-2 hover:bg-neutral-800 p-2 rounded"
+            >
+              <Image
+                src={`${process.env.BASE_URL}/${song.image}`}
+                alt=""
+                width={500}
+                height={500}
+                className="aspect-square max-w-10 object-cover block rounded-md"
+              />
+              <div>
+                <p>{song.title}</p>
+                <p className="text-neutral-400 text-sm">{song.artist.name}</p>
+              </div>
+              <form className="ml-auto" onSubmit={handleSubmit(onSubmit)}>
+                <button
+                  className="rounded-full border border-neutral-400 hover:border-white hover:scale-105 font-semibold px-3 py-1"
+                  ref={ref}
+                  onClick={() => {
+                    setPlaylistSong('song', song.id)
+                  }}
+                >
+                  Add
+                </button>
+              </form>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <>
+          {value && (
+            <p className="mt-4">No result for '<span className="font-semibold">{value}</span>'.</p>
+          )}
+        </>
+      )}
     </>
   )
 }

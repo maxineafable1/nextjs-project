@@ -8,6 +8,7 @@ type InputLabelProps<T extends FieldValues> = {
   type?: 'text' | 'password'
   error: string | undefined
   autoFocus?: boolean
+  defaultValue?: string
 }
 
 export default function InputForm<T extends FieldValues>({
@@ -18,6 +19,7 @@ export default function InputForm<T extends FieldValues>({
   error,
   type = 'text',
   autoFocus,
+  defaultValue,
 }: InputLabelProps<T>) {
 
   return (
@@ -34,6 +36,7 @@ export default function InputForm<T extends FieldValues>({
       `}
       {...register(name)}
       autoFocus={autoFocus}
+      defaultValue={defaultValue}
     />
   )
 }
