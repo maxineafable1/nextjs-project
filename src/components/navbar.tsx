@@ -6,6 +6,8 @@ import { CiSearch } from "react-icons/ci";
 import ProfileIcon from "./user/profile-icon";
 import prisma from "@/lib/db";
 import HomeButton from "./home-btn";
+import LogoutPopup from "./logout-popup";
+import NavbarLogin from "./navbar-login";
 
 export default async function Navbar() {
   const session = await getSession()
@@ -58,13 +60,7 @@ export default async function Navbar() {
               >
                 Sign up</Link>
             </li>
-            <li>
-              <Link
-                href='/login'
-                className="bg-white block hover:scale-105 hover:bg-neutral-200 text-neutral-900 font-bold py-3 px-8 rounded-full"
-              >
-                Log in</Link>
-            </li>
+            <NavbarLogin />
           </>
         )}
       </ul>

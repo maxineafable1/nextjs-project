@@ -8,6 +8,9 @@ import { IoIosAdd, IoIosAddCircleOutline } from "react-icons/io";
 import { CiSearch } from "react-icons/ci";
 import AddToPlaylistModal from "../add-to-playlist";
 import useModal from "@/hooks/useModal";
+import LoginPopup from "../login-popup";
+import { useLoginPopupContext } from "@/contexts/login-popup-context";
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 
 type SongEllipsisProps = {
   isCreate: boolean
@@ -31,6 +34,7 @@ type SongEllipsisProps = {
   }[]
 
   playlistSongId: string | undefined
+  active: boolean
 }
 
 export default function SongEllipsis({
@@ -49,9 +53,18 @@ export default function SongEllipsis({
   playlistName,
   userPlaylists,
   playlistSongId,
+  active,
 }: SongEllipsisProps) {
   const [isInnerHover, setIsInnerHover] = useState(false)
   const { dialogRef, isOpen, setIsOpen } = useModal()
+
+  const [selectedPlaylist, setSelectedPlaylist] = useState<{
+    playlistName: string,
+    playlistId: string,
+  } | null>(null)
+
+  const { setIsPopup } = useLoginPopupContext()
+
   const [searchValue, setSearchValue] = useState('')
 
   const divRef = useRef<HTMLDivElement>(null)
@@ -61,23 +74,32 @@ export default function SongEllipsis({
 
   const deleteSongFromPlaylistWithId = deleteSongFromPlaylist.bind(null, playlistId as string, songId, playlistSongId as string)
 
-  useEffect(() => {
+  // useEffect(() => {
+  //   // wag alisin itong return para makapag play ng music
+  //   if (!isCreate) return
+  //   function handleClickOutside(e: MouseEvent) {
+  //     if (!divRef.current?.contains(e.target as Node)
+  //       && !btnRef.current?.contains(e.target as Node)
+  //       && !playlistRef.current?.contains(e.target as Node)
+  //     ) {
+  //       setIsCreate(false)
+  //       setIsHover(false)
+  //     }
+  //   }
+  //   document.addEventListener("mousedown", handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside)
+  //   }
+  // }, [isCreate])
+
+  function handleClickOutside() {
     // wag alisin itong return para makapag play ng music
     if (!isCreate) return
-    function handleClickOutside(e: MouseEvent) {
-      if (!divRef.current?.contains(e.target as Node)
-        && !btnRef.current?.contains(e.target as Node)
-        && !playlistRef.current?.contains(e.target as Node)
-      ) {
-        setIsCreate(false)
-        setIsHover(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isCreate])
+    setIsCreate(false)
+    setIsHover(false)
+  }
+
+  useOnClickOutside([divRef, btnRef, playlistRef], handleClickOutside, [isCreate])
 
   const saveToLikedSongsWithId = saveToLikedSongs.bind(null, songId)
   const removeFromLikedSongsWithId = removeFromLikedSongs.bind(null, songId, playlistSongId as string)
@@ -108,7 +130,7 @@ export default function SongEllipsis({
               ref={playlistRef}
               className={`
                 absolute -left-full ${likedSongIds?.includes(songId) && 'translate-x-8'}  bg-neutral-800  
-                z-20 rounded p-1.5 ${validUser && 'min-h-36'} max-h-36 overflow-y-auto
+                z-20 rounded p-1.5 ${active && 'min-h-36'} max-h-36 overflow-y-auto
               `}
               onMouseEnter={() => setIsInnerHover(true)}
             >
@@ -128,15 +150,13 @@ export default function SongEllipsis({
                 />
               </div>
               <form
-                action={validUser ? createPlaylistWithSongWithId : ''}
+                action={active ? createPlaylistWithSongWithId : ''}
                 onSubmit={e => {
-                  if (validUser) {
-                    setIsInnerHover(false)
-                    setIsCreate(false)
-                  } else {
+                  if (!active) {
                     e.preventDefault()
-                    alert('login pls')
+                    setIsPopup(true)
                   }
+                  setIsCreate(false)
                 }}
               >
                 <button
@@ -146,7 +166,7 @@ export default function SongEllipsis({
                 </button>
               </form>
               <div className="h-px w-full bg-neutral-700"></div>
-              {validUser && (
+              {active && (
                 <ul>
                   {userPlaylists
                     .filter(p => p.name.toLowerCase().includes(searchValue.toLowerCase()))
@@ -156,27 +176,38 @@ export default function SongEllipsis({
                           onClick={() => {
                             if (playlist.songIds.includes(songId)) {
                               setIsOpen(true)
+                              setSelectedPlaylist({
+                                playlistId: playlist.id,
+                                playlistName: playlist.name
+                              })
                             } else {
                               const updatePlaylistWithId = updatePlaylist.bind(null, playlist.id, songId)
                               updatePlaylistWithId()
                             }
                           }}
                           className={`
-                        text-start p-2 text-sm hover:bg-neutral-600 cursor-pointer
-                      `}
+                            text-start p-2 text-sm hover:bg-neutral-600 cursor-pointer
+                            line-clamp-1
+                          `}
                         >
                           {playlist.name.split('').map((letter, i) => (
-                            <span className={`${searchValue.toLowerCase().includes(letter.toLowerCase()) && 'bg-blue-400 rounded-full'}`}>
+                            <span
+                              key={i}
+                              className={`
+                                ${searchValue.toLowerCase().includes(letter.toLowerCase()) && 'bg-blue-400 rounded-full'}
+                              `}
+                            >
                               {letter}
                             </span>
                           ))}
                         </li>
-                        {isOpen && (
+                        {(isOpen && selectedPlaylist != null) && (
                           <AddToPlaylistModal
+                            key={playlist.id}
                             dialogRef={dialogRef}
                             setIsOpen={setIsOpen}
-                            playlistName={playlist.name}
-                            clickedPlaylistId={playlist.id}
+                            playlistName={selectedPlaylist.playlistName}
+                            clickedPlaylistId={selectedPlaylist.playlistId}
                           />
                         )}
                       </Fragment>
@@ -262,19 +293,26 @@ export default function SongEllipsis({
           </>
         )}
         <form
-          action={!likedSongIds?.includes(songId) ? saveToLikedSongsWithId : removeFromLikedSongsWithId}
+          action={active ? (likedSongIds?.includes(songId) ? removeFromLikedSongsWithId : saveToLikedSongsWithId) : ''}
           onMouseEnter={() => setIsInnerHover(false)}
+          onSubmit={e => {
+            if (!active) {
+              e.preventDefault()
+              setIsPopup(true)
+            }
+            setIsCreate(false)
+          }}
         >
           <button
             className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
           >
-            {!likedSongIds?.includes(songId) ? (
+            {active && likedSongIds?.includes(songId) ? (
               <>
-                <IoIosAddCircleOutline /> Save to your Liked Songs
+                <FaCheck className={`bg-green-500 text-black p-0.5 rounded-full`} /> Remove from your Liked Songs
               </>
             ) : (
               <>
-                <FaCheck className={`bg-green-500 text-black p-0.5 rounded-full`} /> Remove from your Liked Songs
+                <IoIosAddCircleOutline /> Save to your Liked Songs
               </>
             )}
           </button>

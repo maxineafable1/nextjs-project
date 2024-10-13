@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useRef, useState } from 'react'
+import React, { RefObject, useEffect, useRef, useState } from 'react'
 import { IoIosAdd } from 'react-icons/io'
 import { BiSolidPlaylist } from "react-icons/bi";
 import { MdLibraryMusic } from "react-icons/md";
@@ -8,6 +8,9 @@ import Link from 'next/link';
 import useModal from '@/hooks/useModal';
 import CreateAlbumModal from './reusables/create-album-modal';
 import { LuLibrary } from "react-icons/lu";
+import LoginPopup from './login-popup';
+import { useLoginPopupContext } from '@/contexts/login-popup-context';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 type SidebarButtonProps = {
   action: () => void
@@ -16,6 +19,7 @@ type SidebarButtonProps = {
 
 export default function SidebarButton({ action, active }: SidebarButtonProps) {
   const [isCreate, setIsCreate] = useState(false)
+  const { isPopup, setIsPopup } = useLoginPopupContext()
 
   const { dialogRef, isOpen, setIsOpen } = useModal()
 
@@ -24,21 +28,27 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
   const plusBtnRef = useRef<HTMLButtonElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (!divRef.current?.contains(e.target as Node)
-        && (!btnRef.current?.contains(e.target as Node))
-        && (!plusBtnRef.current?.contains(e.target as Node))
-        && (!listRef.current?.contains(e.target as Node))
-      ) {
-        setIsCreate(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isCreate])
+  // useEffect(() => {
+  //   function handleClickOutside(e: MouseEvent) {
+  //     if (!divRef.current?.contains(e.target as Node)
+  //       && (!btnRef.current?.contains(e.target as Node))
+  //       && (!plusBtnRef.current?.contains(e.target as Node))
+  //       && (!listRef.current?.contains(e.target as Node))
+  //     ) {
+  //       active ? setIsCreate(false) : setIsPopup(false)
+  //     }
+  //   }
+  //   document.addEventListener("mousedown", handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside)
+  //   }
+  // }, [isCreate, isPopup])
+
+  function handleClickOutside() {
+    active ? setIsCreate(false) : setIsPopup(false)
+  }
+
+  useOnClickOutside([divRef, btnRef, plusBtnRef, listRef], handleClickOutside, [isCreate, isPopup])
 
   useEffect(() => {
     if (isOpen)
@@ -56,7 +66,7 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
           <button
             ref={plusBtnRef}
             className='hover:bg-neutral-800 text-neutral-400 hover:text-white rounded-full'
-            onClick={() => setIsCreate(true)}
+            onClick={() => active ? setIsCreate(true) : setIsPopup(true)}
           >
             <IoIosAdd fontSize='1.75rem' />
           </button>
@@ -94,35 +104,16 @@ export default function SidebarButton({ action, active }: SidebarButtonProps) {
           <button
             ref={btnRef}
             className='mt-4 rounded-full bg-white hover:scale-105 hover:bg-neutral-200 text-black text-sm font-semibold px-3 py-1'
-            onClick={() => setIsCreate(true)}
+            onClick={() => setIsPopup(true)}
           >
             Create playlist
           </button>
-          <div
-            ref={divRef}
-          >
-            <div
-              className={`
-              bg-sky-600 absolute left-60 top-0 shadow rounded z-10
-                ${!isCreate && 'hidden'} w-80 p-3 flex flex-col gap-2 div-pop-up
-              `}
-            >
-              <h2 className='font-semibold'>Create a playlist</h2>
-              <p className='text-sm'>Log in to create and share playlists.</p>
-              <div className='self-end mt-4 flex gap-3 items-center font-semibold text-sm'>
-                <button
-                  className='text-neutral-400 hover:text-white'
-                  onClick={() => setIsCreate(false)}
-                >
-                  Not now</button>
-                <Link
-                  href='/login'
-                  className='text-black rounded-full bg-white px-3 py-1 hover:scale-105 hover:bg-neutral-200'
-                >
-                  Log in</Link>
-              </div>
-            </div>
-          </div>
+          {isPopup && (
+            <LoginPopup
+              divRef={divRef}
+              setIsPopup={setIsPopup}
+            />
+          )}
         </div>
       )}
       {isOpen && (

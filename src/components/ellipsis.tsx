@@ -1,4 +1,4 @@
-import { deletePlaylist } from '@/actions/song'
+import { deletePlaylist, updatePlaylistDetails } from '@/actions/song'
 import useModal from '@/hooks/useModal'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
@@ -8,10 +8,15 @@ import { MdEdit } from 'react-icons/md'
 import EditPlaylistModal from './reusables/edit-playlist-modal'
 import Link from 'next/link'
 import { FiUpload } from "react-icons/fi";
-import EditArtistModal from './reusables/edit-artist-modal'
 import DeleteModal from './reusables/delete-modal'
 import { IoIosAddCircleOutline } from "react-icons/io";
 import { FaCheck } from 'react-icons/fa'
+import { useLoginPopupContext } from '@/contexts/login-popup-context'
+import { ArtistInfoData } from './artist/header'
+import { ArtistInfoSchema, PlaylistDetailSchema } from '@/lib/definitions'
+import { PlaylistDetailData } from './playlist/header'
+import { updateUserInfo } from '@/actions/auth'
+import { useOnClickOutside } from '@/hooks/useOnClickOutside'
 
 type EllipsisProps = {
   playlistName: string | null | undefined
@@ -23,6 +28,22 @@ type EllipsisProps = {
   isInLibrary?: { id: string } | null
   addOtherUserPlaylistWithId?: () => Promise<void>
   deleteFromLibraryWithId?: () => Promise<void>
+  active: boolean
+}
+
+type Artist = {
+  zData: ArtistInfoData
+  zSchema: typeof ArtistInfoSchema
+}
+
+type Playlist = {
+  zData: PlaylistDetailData
+  zSchema: typeof PlaylistDetailSchema
+}
+
+function getType<T = 'Playlist'>(input: T):
+  T extends 'Artist' ? Artist : Playlist {
+  return {} as any
 }
 
 export default function Ellipsis({
@@ -35,33 +56,46 @@ export default function Ellipsis({
   isInLibrary,
   addOtherUserPlaylistWithId,
   deleteFromLibraryWithId,
+  active,
 }: EllipsisProps) {
   const [isCreate, setIsCreate] = useState(false)
+
+  const { setIsPopup } = useLoginPopupContext()
 
   const { dialogRef, isOpen, setIsOpen } = useModal()
   const { dialogRef: editDialogRef, isOpen: isEditOpen, setIsOpen: setIsEditOpen } = useModal()
 
   const divRef = useRef<HTMLDivElement>(null)
+  const ellipsisRef = useRef<HTMLButtonElement>(null)
 
   const { id: playlistId } = useParams()
 
   const deletePlaylistWithId = deletePlaylist.bind(null, playlistId as string)
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (!divRef.current?.contains(e.target as Node)) {
-        setIsCreate(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isCreate])
+  // useEffect(() => {
+  //   function handleClickOutside(e: MouseEvent) {
+  //     if (!divRef.current?.contains(e.target as Node)) {
+  //       setIsCreate(false)
+  //     }
+  //   }
+  //   document.addEventListener("mousedown", handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside)
+  //   }
+  // }, [isCreate])
+
+  function handleClickOutside() {
+    setIsCreate(false)
+  }
+
+  useOnClickOutside([divRef, ellipsisRef], handleClickOutside, [isCreate])
+
+  const res = getType(category)
 
   return (
     <div className="relative">
       <button
+        ref={ellipsisRef}
         onClick={() => setIsCreate(true)}
         className="text-neutral-400 grid hover:text-white hover:scale-105"
       >
@@ -103,12 +137,20 @@ export default function Ellipsis({
         ) : (
           <>
             {category !== 'Artist' && (
-              <form action={isInLibrary ? deleteFromLibraryWithId : addOtherUserPlaylistWithId}>
+              <form
+                action={active ? (isInLibrary ? deleteFromLibraryWithId : addOtherUserPlaylistWithId) : ''}
+                onSubmit={e => {
+                  if (!active) {
+                    e.preventDefault()
+                    setIsPopup(true)
+                  }
+                  setIsCreate(false)
+                }}
+              >
                 <button
-                  onClick={() => setIsCreate(false)}
                   className="w-full inline-flex items-center gap-2 text-start p-2 hover:bg-neutral-600"
                 >
-                  {isInLibrary ? (
+                  {active && isInLibrary ? (
                     <>
                       <FaCheck className={`${isInLibrary && 'bg-green-500 text-black p-0.5 rounded-full'}`} /> Remove from Your Library
                     </>
@@ -119,6 +161,11 @@ export default function Ellipsis({
                   )}
                 </button>
               </form>
+            )}
+            {category === 'Artist' && (
+              <button onClick={() => alert('sabing wala pa')}>
+                Wala pa po
+              </button>
             )}
           </>
         )}
@@ -134,28 +181,17 @@ export default function Ellipsis({
         />
       )}
       {isEditOpen && (
-        <>
-          {category === 'Artist' ? (
-            <EditArtistModal
-              dialogRef={editDialogRef}
-              image={image}
-              setIsOpen={setIsOpen}
-              urlId={urlId!}
-              validUser={validUser}
-              name={artistName}
-            />
-          ) : (
-            <EditPlaylistModal
-              dialogRef={editDialogRef}
-              setIsOpen={setIsEditOpen}
-              playlistId={playlistId}
-              image={image}
-              playlistName={playlistName}
-              category={category}
-            />
-          )}
-        </>
-
+        <EditPlaylistModal<typeof res.zData, typeof res.zSchema>
+          dialogRef={editDialogRef}
+          setIsOpen={setIsOpen}
+          image={image}
+          playlistName={playlistName}
+          category={category}
+          registerImage="image"
+          registerName="name"
+          schema={res.zSchema}
+          action={category === 'Artist' ? updateUserInfo.bind(null, urlId as string) : updatePlaylistDetails.bind(null, playlistId as string)}
+        />
       )}
     </div>
   )

@@ -97,7 +97,9 @@ export default function CardGenre({
             {isArtistIcon ? <FaUser /> : <FaMusic />}
           </div>
         )}
-        <p className="text-neutral-400 hover:text-white hover:underline mt-2 text-sm">
+        <p 
+          title={name!}
+          className="text-neutral-400 hover:text-white hover:underline mt-2 text-sm line-clamp-1">
           {name}
         </p>
       </Link>

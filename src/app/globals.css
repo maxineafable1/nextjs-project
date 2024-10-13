@@ -65,4 +65,17 @@
     border-bottom: 8px solid transparent;
     @apply border-r-8 border-r-sky-600
   }
+
+  .div-logout-pop-up::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    translate: -2.5rem -1rem;
+    width: 0;
+    border-top: 8px solid transparent;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    @apply border-b-8 border-b-sky-600
+  }
 }

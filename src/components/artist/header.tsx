@@ -8,6 +8,8 @@ import { MdEdit } from "react-icons/md"
 import { z } from "zod"
 import { FaUser } from "react-icons/fa";
 import EditArtistModal from "../reusables/edit-artist-modal"
+import EditPlaylistModal from "../reusables/edit-playlist-modal"
+import { updateUserInfo } from "@/actions/auth"
 
 type ArtistHeaderProps = {
   active: boolean
@@ -93,13 +95,24 @@ export default function ArtistHeader({
         </h2>
       </div>
       {isOpen && (
-        <EditArtistModal
+        // <EditArtistModal
+        //   dialogRef={dialogRef}
+        //   image={image}
+        //   setIsOpen={setIsOpen}
+        //   urlId={urlId}
+        //   validUser={validUser}
+        //   name={name}
+        // />
+        <EditPlaylistModal<ArtistInfoData, typeof ArtistInfoSchema>
           dialogRef={dialogRef}
-          image={image}
           setIsOpen={setIsOpen}
-          urlId={urlId}
-          validUser={validUser}
-          name={name}
+          image={image}
+          playlistName={name}
+          category='Artist'
+          registerImage="image"
+          registerName="name"
+          schema={ArtistInfoSchema}
+          action={updateUserInfo.bind(null, urlId as string)}
         />
       )}
     </div>

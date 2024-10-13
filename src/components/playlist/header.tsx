@@ -10,6 +10,7 @@ import { PlaylistDetailSchema } from "@/lib/definitions"
 import { useParams } from "next/navigation"
 import Link from "next/link"
 import EditPlaylistModal from "../reusables/edit-playlist-modal"
+import { updatePlaylistDetails } from "@/actions/song"
 
 type HeaderProps = {
   image: string | undefined | null
@@ -53,7 +54,7 @@ export default function Header({
   return (
     <div className="flex items-center gap-6">
       <div
-        className="w-36 aspect-square block"
+        className="w-full max-w-36 aspect-square"
         onMouseEnter={() => notLikedSongs && setIsEditPhoto(true)}
         onMouseLeave={() => notLikedSongs && setIsEditPhoto(false)}
         onClick={() => {
@@ -105,7 +106,11 @@ export default function Header({
       </div>
       <div>
         <h2
-          className={`text-7xl font-extrabold mb-8 ${notLikedSongs && 'cursor-pointer'}`}
+          title={name}
+          className={`
+            text-7xl font-extrabold mb-8 line-clamp-1
+            ${notLikedSongs && 'cursor-pointer'}
+          `}
           onClick={() => notLikedSongs && setIsOpen(true)}
         >
           {name}</h2>
@@ -125,13 +130,16 @@ export default function Header({
         </div>
       </div>
       {isOpen && (
-        <EditPlaylistModal
+        <EditPlaylistModal<PlaylistDetailData, typeof PlaylistDetailSchema>
           dialogRef={dialogRef}
           setIsOpen={setIsOpen}
           image={image}
-          playlistId={playlistId}
           playlistName={name}
           category={category}
+          registerImage="image"
+          registerName="name"
+          schema={PlaylistDetailSchema}
+          action={updatePlaylistDetails.bind(null, playlistId as string)}
         />
       )}
     </div>

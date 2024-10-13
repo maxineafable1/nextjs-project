@@ -19,8 +19,8 @@ export default function AddToPlaylistModal({
       className='bg-white text-sm p-6 text-start text-black rounded-lg shadow'
     >
       <p className='font-extrabold mb-2'>Already added</p>
-      <p>This is already in your '{playlistName}' playlist.</p>
-      <div className='mt-6 flex items-center text-base font-bold'>
+      <p>This is already in your <span className='font-medium'>'{playlistName}'</span> playlist.</p>
+      <div className='mt-6 flex justify-center items-center text-base font-bold'>
         <button 
           onClick={() => alert(clickedPlaylistId)}
           className='text-neutral-400 px-8 py-3 rounded-full bg-inherit hover:text-neutral-950'>

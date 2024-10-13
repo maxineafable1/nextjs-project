@@ -7,6 +7,7 @@ import Player from "@/components/song/player";
 import { SongProvider } from "@/contexts/song-context";
 import { getSession } from "@/actions/auth";
 import Sidebar from "@/components/sidebar";
+import { LoginPopupProvider } from "@/contexts/login-popup-context";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -40,16 +41,18 @@ export default async function RootLayout({
         `}
       >
         <SongProvider>
-          <Container>
-            <Navbar />
-            <main className="lg:grid grid-cols-4 gap-2 min-h-screen mb-4">
-              <Sidebar />
-              <div className="col-span-3 bg-neutral-900 rounded-lg p-4">
-                {children}
-              </div>
-            </main>
-          </Container>
-          {session.active && <Player />}
+          <LoginPopupProvider>
+            <Container>
+              <Navbar />
+              <main className="lg:grid grid-cols-4 gap-2 min-h-screen mb-4">
+                <Sidebar />
+                <div className="col-span-3 bg-neutral-900 rounded-lg p-4">
+                  {children}
+                </div>
+              </main>
+            </Container>
+            {session.active && <Player />}
+          </LoginPopupProvider>
         </SongProvider>
       </body>
     </html>

@@ -1,3 +1,4 @@
+import { useOnClickOutside } from "@/hooks/useOnClickOutside";
 import { useEffect, useRef, useState } from "react";
 import { FaList, FaBars } from "react-icons/fa";
 import { FaCheck } from "react-icons/fa6";
@@ -24,19 +25,25 @@ export default function ListCompact({ viewAs, setViewAs }: ListCompactProps) {
   const divRef = useRef<HTMLDivElement>(null)
   const btnRef = useRef<HTMLButtonElement>(null)
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (!divRef.current?.contains(e.target as Node)
-        && !btnRef.current?.contains(e.target as Node)
-      ) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen])
+  // useEffect(() => {
+  //   function handleClickOutside(e: MouseEvent) {
+  //     if (!divRef.current?.contains(e.target as Node)
+  //       && !btnRef.current?.contains(e.target as Node)
+  //     ) {
+  //       setIsOpen(false)
+  //     }
+  //   }
+  //   document.addEventListener("mousedown", handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside)
+  //   }
+  // }, [isOpen])
+
+  function handleClickOutside() {
+    setIsOpen(false)
+  }
+
+  useOnClickOutside([divRef, btnRef], handleClickOutside, [isOpen])
 
   return (
     <div className='ml-auto relative'>

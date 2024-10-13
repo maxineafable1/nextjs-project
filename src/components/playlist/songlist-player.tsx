@@ -13,6 +13,7 @@ import { IoIosAddCircleOutline } from 'react-icons/io'
 // import HoverPlayButton from '../hover-play-btn'
 import relativeTime from 'dayjs/plugin/relativeTime'
 import dayjs from 'dayjs'
+import { useLoginPopupContext } from '@/contexts/login-popup-context'
 
 type SonglistPlayerProps = {
   song: SampleTypeForPlaylist
@@ -73,6 +74,8 @@ export default function SonglistPlayer({
   const { dialogRef, isOpen, setIsOpen } = useModal()
   const { dialogRef: deleteDialogRef, isOpen: isDeleteOpen, setIsOpen: setIsDeleteOpen } = useModal()
 
+  const { setIsLogoutPopup } = useLoginPopupContext()
+
   const [isCreate, setIsCreate] = useState(false)
 
   const { id: playlistId } = useParams()
@@ -116,7 +119,7 @@ export default function SonglistPlayer({
               }
             }}
           >
-            <FaPlay />
+            <FaPlay className='text-sm hover:fill-neutral-200' />
           </button>
         ) : (
           <p>{index + 1}</p>
@@ -240,16 +243,17 @@ export default function SonglistPlayer({
         )}
         {isHover && (
           <form
-            action={(active && likedSongIds?.includes(song.id)) ? '' : saveToLikedSongsWithId}
+            action={active ? (likedSongIds?.includes(song.id) ? '' : saveToLikedSongsWithId) : ''}
             className='absolute right-10 grid'
-            onClick={() => {
+            title={`${(active && likedSongIds?.includes(song.id)) ? 'Remove from Liked Songs' : 'Add to Liked Songs'}`}
+            onSubmit={e => {
               if (!active) {
-                alert('login pls')
+                e.preventDefault()
+                setIsLogoutPopup(true)
               }
             }}
           >
             <button
-              title={`${(active && likedSongIds?.includes(song.id)) ? 'Remove from Liked Songs' : 'Add to Liked Songs'}`}
               className={`hover:scale-110 justify-self-center`}
             >
               {(active && likedSongIds?.includes(song.id)) ? (
@@ -292,6 +296,7 @@ export default function SonglistPlayer({
             playlistName={playlistName}
             userPlaylists={userPlaylists}
             playlistSongId={playlistSongId}
+            active={active}
           />
         )}
       </div>

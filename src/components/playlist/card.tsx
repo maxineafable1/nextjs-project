@@ -10,9 +10,12 @@ import { SampleTypeForPlaylist } from '../song/card';
 import { FiMinusCircle } from 'react-icons/fi';
 import { MdEdit } from 'react-icons/md';
 import useModal from '@/hooks/useModal';
-import { deleteFromLibrary, deletePlaylist } from '@/actions/song';
+import { deleteFromLibrary, deletePlaylist, updatePlaylistDetails } from '@/actions/song';
 import EditPlaylistModal from '../reusables/edit-playlist-modal';
 import DeleteModal from '../reusables/delete-modal';
+import { PlaylistDetailData } from './header';
+import { PlaylistDetailSchema } from '@/lib/definitions';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 
 type PlaylistCardProps = {
   songs: SampleTypeForPlaylist[]
@@ -51,17 +54,23 @@ export default function PlaylistCard({
 
   const deletePlaylistWithId = deletePlaylist.bind(null, albumId as string)
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (!divRef.current?.contains(e.target as Node)) {
-        setIsCreate(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isCreate])
+  // useEffect(() => {
+  //   function handleClickOutside(e: MouseEvent) {
+  //     if (!divRef.current?.contains(e.target as Node)) {
+  //       setIsCreate(false)
+  //     }
+  //   }
+  //   document.addEventListener("mousedown", handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside)
+  //   }
+  // }, [isCreate])
+
+  function handleClickOutside() {
+    setIsCreate(false)
+  }
+
+  useOnClickOutside(divRef, handleClickOutside, isCreate)
 
   const validUser = active && currUserId === playlistUserId
 
@@ -70,6 +79,7 @@ export default function PlaylistCard({
   return (
     <div className='relative'>
       <Link
+        title={albumName}
         onContextMenu={e => {
           e.preventDefault()
           albumName !== 'Liked Songs' && setIsCreate(true)
@@ -135,7 +145,9 @@ export default function PlaylistCard({
           )}
         </div>
         <div>
-          <p className='font-medium'>{albumName}</p>
+          <p className='font-medium line-clamp-1'>
+            {albumName}
+          </p>
           <div className='flex items-center gap-1 text-neutral-400 text-sm'>
             <p>{category}</p>
             <div className='w-1 h-1 bg-neutral-400 rounded-full'></div>
@@ -196,13 +208,16 @@ export default function PlaylistCard({
         />
       )}
       {isEditOpen && (
-        <EditPlaylistModal
+        <EditPlaylistModal<PlaylistDetailData, typeof PlaylistDetailSchema>
           dialogRef={editDialogRef}
           setIsOpen={setIsEditOpen}
-          playlistId={albumId}
           image={playlistImage}
           playlistName={albumName}
           category={category}
+          registerImage="image"
+          registerName="name"
+          schema={PlaylistDetailSchema}
+          action={updatePlaylistDetails.bind(null, albumId as string)}
         />
       )}
     </div>

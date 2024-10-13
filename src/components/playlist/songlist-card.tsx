@@ -7,8 +7,6 @@ import { useEffect, useRef, useState } from "react"
 import SonglistPlayer from "./songlist-player"
 import { useSongContext } from "@/contexts/song-context"
 import useModal from "@/hooks/useModal"
-import Image from "next/image"
-import Link from "next/link"
 import Ellipsis from "../ellipsis"
 import ListCompact from "./list-compact"
 import UnauthModal from "../reusables/unauth-modal"
@@ -16,6 +14,7 @@ import { IoIosAddCircleOutline } from "react-icons/io"
 import { addOtherUserPlaylist, deleteFromLibrary } from "@/actions/song"
 import { useParams } from "next/navigation"
 import { FaCheck } from "react-icons/fa6";
+import { useLoginPopupContext } from "@/contexts/login-popup-context"
 
 type SonglistCardProps = {
   // songs: SampleTypeForPlaylist[] | undefined
@@ -64,6 +63,8 @@ export default function SonglistCard({
   const [durations, setDurations] = useState<(number | undefined)[]>([])
   const [viewAs, setViewAs] = useState<'List' | 'Compact'>('List')
 
+  const { setIsPopup } = useLoginPopupContext()
+
   const audioRef = useRef<(HTMLAudioElement | null)[]>([])
 
   useEffect(() => {
@@ -109,23 +110,24 @@ export default function SonglistCard({
             </button>
             {!validUser && (
               <form
-                action={(active && isInLibrary) ? deleteFromLibraryWithId : addOtherUserPlaylistWithId}
+                action={active ? (isInLibrary ? deleteFromLibraryWithId : addOtherUserPlaylistWithId) : ''}
+                title={active ? (isInLibrary ? 'Remove from Your Library' : 'Save to Your Library') : 'Save to Your Library'}
                 className="grid"
+                onSubmit={e => {
+                  if (!active) {
+                    e.preventDefault()
+                    setIsPopup(true)
+                  }
+                }}
               >
                 <button
                   className={`
                     text-neutral-400 hover:text-white hover:scale-105
                     ${(active && isInLibrary) && 'bg-green-500 p-2 rounded-full'}
                   `}
-                  onClick={() => {
-                    if (!active) {
-                      alert('login pls')
-                    }
-                  }}
                 >
                   {(active && isInLibrary) ? (
                     <FaCheck
-                      title={(active && isInLibrary) ? 'Remove from Your Library' : 'Add to Your Library'}
                       // fontSize='1.5rem'
                       className={`text-black`}
                     />
@@ -144,6 +146,7 @@ export default function SonglistCard({
                 isInLibrary={isInLibrary}
                 addOtherUserPlaylistWithId={addOtherUserPlaylistWithId}
                 deleteFromLibraryWithId={deleteFromLibraryWithId}
+                active={active}
               />
             )}
             <ListCompact

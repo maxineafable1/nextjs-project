@@ -44,7 +44,7 @@ export default function LoginForm() {
         </h2>
       </div>
       {errors.root?.message && <p className="flex items-center gap-2 text-white bg-red-400 p-3 text-sm rounded-sm">
-        <MdErrorOutline />
+        <MdErrorOutline className="text-lg" />
         {errors.root.message}
       </p>}
       <div className="bg-neutral-700 h-px w-full my-16"></div>
@@ -84,7 +84,10 @@ export default function LoginForm() {
           />
           <p className="text-sm text-red-400 mt-1">{errors?.password?.message}</p>
           <button
-            className={`absolute right-4 top-1/2 ${errors.password?.message && '-translate-y-1/2'} text-xl`}
+            className={`
+              absolute right-4 top-1/2 ${errors.password?.message && '-translate-y-1/2'} text-xl
+              focus-visible:outline outline-white
+            `}
             onClick={() => setIsVisible(prev => !prev)}
             type="button"
           >

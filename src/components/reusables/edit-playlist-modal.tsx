@@ -1,48 +1,48 @@
-import { SubmitHandler, useForm } from "react-hook-form"
-import { PlaylistDetailData } from "../playlist/header"
-import { PlaylistDetailSchema } from "@/lib/definitions"
+import { FieldValues, Path, SubmitHandler, useForm, WatchObserver } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { updatePlaylistDetails } from "@/actions/song"
 import { RefObject, SetStateAction, useState } from "react"
 import { IoClose } from "react-icons/io5"
 import Image from "next/image"
 import { MdEdit } from "react-icons/md"
 import { FaMusic } from "react-icons/fa"
 import InputForm from "../input-form"
+import { ZodSchema } from "zod"
 
-type EditPlaylistModalProps = {
+type EditPlaylistModalProps<T extends FieldValues, U extends ZodSchema> = {
   dialogRef: RefObject<HTMLDialogElement>
-  // isOpen: boolean
   setIsOpen: React.Dispatch<SetStateAction<boolean>>
   image: string | undefined | null
   playlistName: string | null | undefined
-  playlistId: string | string[]
   category: string | undefined
+  registerImage: Path<T>
+  registerName: Path<T>
+  schema: U
+  action: (name: string, image?: string) => Promise<void>
 }
 
-export default function EditPlaylistModal({
+export default function EditPlaylistModal<T extends FieldValues, U extends ZodSchema>({
   dialogRef,
   setIsOpen,
   image,
   playlistName,
-  playlistId,
   category,
-}: EditPlaylistModalProps) {
+  registerImage,
+  registerName,
+  schema,
+  action,
+}: EditPlaylistModalProps<T, U>) {
   const [isEditPhoto, setIsEditPhoto] = useState(false)
-  // const [photoValue, setPhotoValue] = useState<File | null>(null)
 
-  const { register, formState: { errors }, handleSubmit, watch } = useForm<PlaylistDetailData>({
+  const { register, formState: { errors }, handleSubmit, watch } = useForm<T>({
     mode: 'all',
-    resolver: zodResolver(PlaylistDetailSchema)
+    resolver: zodResolver(schema)
   })
 
-  const photoValue = watch('image', null)
+  const photoValue = watch(registerImage)
 
-  // const { onChange, name: registerName, ref } = register('image')
-
-  const onSubmit: SubmitHandler<PlaylistDetailData> = async (data) => {
+  const onSubmit: SubmitHandler<T> = async (data) => {
     try {
-      const updatePlaylistDetailsWithId = updatePlaylistDetails.bind(null, playlistId as string)
+      // const updatePlaylistDetailsWithId = updatePlaylistDetails.bind(null, playlistId as string)
       if (data.image[0]) {
         const formData = new FormData()
         formData.append('image', data.image[0])
@@ -55,10 +55,10 @@ export default function EditPlaylistModal({
 
         const { imgFileName } = await res.json()
 
-        const updateRes = await updatePlaylistDetailsWithId(data.name, imgFileName)
+        const updateRes = await action(data.name, imgFileName)
         console.log(updateRes)
       } else {
-        const updateRes = await updatePlaylistDetailsWithId(data.name)
+        const updateRes = await action(data.name)
         console.log(updateRes)
       }
       setIsOpen(false)
@@ -115,7 +115,8 @@ export default function EditPlaylistModal({
                       width={500}
                       height={500}
                       className={`
-                        aspect-square object-cover block rounded-md
+                        aspect-square object-cover block
+                        ${category === 'Artist' ? 'rounded-full' : 'rounded-md'}
                         ${isEditPhoto && 'opacity-30'}
                       `}
                     />
@@ -130,7 +131,7 @@ export default function EditPlaylistModal({
                     alt=""
                     width={500}
                     height={500}
-                    className={`aspect-square object-cover block rounded-md`}
+                    className={`aspect-square object-cover block ${category === 'Artist' ? 'rounded-full' : 'rounded-md'}`}
                   />
                 )}
               </div>
@@ -146,9 +147,9 @@ export default function EditPlaylistModal({
                           width={500}
                           height={500}
                           className={`
-                              aspect-square object-cover block rounded-md
-                              ${isEditPhoto && 'opacity-30'}
-                            `}
+                            aspect-square object-cover block ${category === 'Artist' ? 'rounded-full' : 'rounded-md'}
+                            ${isEditPhoto && 'opacity-30'}
+                          `}
                         />
                         <div className="absolute top-0 text-6xl flex flex-col gap-1 items-center justify-center p-6">
                           <MdEdit />
@@ -161,12 +162,18 @@ export default function EditPlaylistModal({
                         alt=""
                         width={500}
                         height={500}
-                        className={`aspect-square object-cover block rounded-md`}
+                        className={`aspect-square object-cover block ${category === 'Artist' ? 'rounded-full' : 'rounded-md'}`}
                       />
                     )}
                   </div>
                 ) : (
-                  <div className="p-6 bg-neutral-700 rounded h-full text-6xl flex flex-col gap-1 items-center justify-center">
+                  <div
+                    className={`
+                      p-6 bg-neutral-700 h-full text-6xl 
+                      flex flex-col gap-1 items-center justify-center
+                      ${category === 'Artist' ? 'rounded-full' : 'rounded-md'}
+                    `}
+                  >
                     {isEditPhoto ? (
                       <>
                         <MdEdit />
@@ -184,7 +191,7 @@ export default function EditPlaylistModal({
             type="file"
             accept="image/*"
             id="file"
-            {...register('image')}
+            {...register(registerImage)}
             className={`sr-only invisible`}
           />
           <div className="flex flex-col justify-between gap-1">
@@ -198,12 +205,12 @@ export default function EditPlaylistModal({
                 className="px-3 py-2 rounded bg-neutral-700"
                 autoFocus
               /> */}
-              <InputForm 
+              <InputForm
                 register={register}
-                name="name"
+                name={registerName}
                 id="name"
                 defaultValue={playlistName!}
-                error={errors.name?.message}
+                error={errors.name?.message?.toString()}
                 autoFocus
               />
             </div>

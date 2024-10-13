@@ -31,7 +31,7 @@ export default function Password({ register, errors, watch }: Props & { watch: U
           autoFocus
         />
         <button
-          className={`absolute right-4 top-1/2 text-xl`}
+          className={`absolute right-4 top-1/2 text-xl focus-visible:outline outline-white`}
           onClick={() => setIsVisible(prev => !prev)}
           type="button"
         >

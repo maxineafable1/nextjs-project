@@ -5,6 +5,7 @@ import LogoutForm from "./logout-form"
 import { Fragment, useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { FaUser } from "react-icons/fa"
+import { useOnClickOutside } from "@/hooks/useOnClickOutside"
 
 type ProfileIconProps = {
   name: string
@@ -19,30 +20,36 @@ export default function ProfileIcon({ name, image, userId }: ProfileIconProps) {
   const dropdownList = [
     <Link
       href='/songs/upload'
-      className="w-full block"
+      className="w-full p-2 block"
     >
       Upload
     </Link>,
     <Link
       href={`/artist/${userId}`}
-      className="w-full block"
+      className="w-full p-2 block"
     >
       Profile
     </Link>,
     <LogoutForm />,
   ]
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (divRef.current && !divRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen])
+  // useEffect(() => {
+  //   function handleClickOutside(e: MouseEvent) {
+  //     if (divRef.current && !divRef.current.contains(e.target as Node)) {
+  //       setIsOpen(false)
+  //     }
+  //   }
+  //   document.addEventListener("mousedown", handleClickOutside)
+  //   return () => {
+  //     document.removeEventListener("mousedown", handleClickOutside)
+  //   }
+  // }, [isOpen])
+
+  function handleClickOutside() {
+    setIsOpen(false)
+  }
+
+  useOnClickOutside(divRef, handleClickOutside, isOpen)
 
   return (
     <div
@@ -80,7 +87,7 @@ export default function ProfileIcon({ name, image, userId }: ProfileIconProps) {
           <Fragment key={i}>
             <li
               onClick={() => setIsOpen(false)}
-              className="hover:bg-neutral-500 rounded-sm p-2 text-sm font-medium"
+              className="hover:bg-neutral-500 rounded-sm text-sm font-medium"
             >
               {list}
             </li>

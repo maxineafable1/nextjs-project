@@ -2,10 +2,8 @@
 
 import { useSongContext } from "@/contexts/song-context";
 import useModal from "@/hooks/useModal";
-import Image from "next/image";
 import { SampleTypeForPlaylist } from "../song/card";
 import { FaPlay } from "react-icons/fa";
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import SonglistPlayer from "../playlist/songlist-player";
 import ListCompact from "../playlist/list-compact";
@@ -100,6 +98,8 @@ export default function ArtistSongCard({
               validUser={validUser}
               artistName={name}
               urlId={urlId}
+              active={active}
+
             />
             <ListCompact
               viewAs={viewAs}
